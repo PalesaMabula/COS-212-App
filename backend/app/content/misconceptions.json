@@ -1,0 +1,83 @@
+{
+  "fifo_lifo": {
+    "title": "Stack order instead of queue order",
+    "explain": "A queue serves the vertex that has waited longest (first in, first out). Taking the newest vertex first is how a stack works, and it turns BFS into a different search.",
+    "topic": "3",
+    "go": "s02",
+    "label": "Watch the queue (Module 3, 02)",
+    "concept": "Queues",
+    "objective": 3
+  },
+  "wrong_layer": {
+    "title": "Skipping ahead a level",
+    "explain": "BFS finishes every vertex 1 edge away before any vertex 2 edges away. A vertex further out can't come before a closer one.",
+    "topic": "3",
+    "go": "s01",
+    "label": "Watch the ripples (Module 3, 01)",
+    "concept": "BFS",
+    "objective": 3
+  },
+  "mark_on_serve": {
+    "title": "Marking a vertex too late",
+    "explain": "A vertex is marked found the moment it joins the queue. If marking waited until it's served, two neighbours could both add it.",
+    "topic": "3",
+    "go": "s03",
+    "label": "See D join twice (Module 3, 03)",
+    "concept": "Marking found",
+    "objective": 4
+  },
+  "duplicate": {
+    "title": "Adding a vertex twice",
+    "explain": "Once a vertex is found, it never joins the queue again, whether it's waiting or already served.",
+    "topic": "3",
+    "go": "s03",
+    "label": "See the bug and the fix (Module 3, 03)",
+    "concept": "Marking found",
+    "objective": 4
+  },
+  "parent_reversed": {
+    "title": "Parent and child swapped",
+    "explain": "A vertex's parent is the vertex that found it, one edge closer to the start. Follow parents back towards the start, never away from it.",
+    "topic": "4",
+    "go": "s03",
+    "label": "Watch the route retraced (Module 4, 03)",
+    "concept": "Routes",
+    "objective": 5
+  },
+  "unreachable": {
+    "title": "Expecting to reach every vertex",
+    "explain": "BFS only travels along edges. A vertex with no chain of edges from the start is never found, however long you search.",
+    "topic": "4",
+    "go": "s05",
+    "label": "Vertices you can't reach (Module 4, 05)",
+    "concept": "Routes",
+    "objective": 5
+  },
+  "count_places_not_edges": {
+    "title": "Counting vertices instead of edges",
+    "explain": "A route's length is the number of edges crossed. A, C, E has 3 vertices but 2 edges.",
+    "topic": "4",
+    "go": "s06",
+    "label": "Count edges (Module 4, 06)",
+    "concept": "Graphs",
+    "objective": 1
+  },
+  "length_is_cost": {
+    "title": "Treating drawn length as cost",
+    "explain": "In an unweighted graph every edge counts as one step, however long it's drawn.",
+    "topic": "2",
+    "go": "s03",
+    "label": "Edges cost the same (Module 2, 03)",
+    "concept": "Graphs",
+    "objective": 1
+  },
+  "one_way_edge": {
+    "title": "Storing an edge one way only",
+    "explain": "An undirected edge goes in both vertices' lists. Missing one makes it a one-way edge.",
+    "topic": "2",
+    "go": "s03",
+    "label": "Edges go both ways (Module 2, 03)",
+    "concept": "Graphs in Python",
+    "objective": 2
+  }
+}

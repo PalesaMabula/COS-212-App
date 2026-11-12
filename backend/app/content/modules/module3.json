@@ -1,0 +1,719 @@
+{
+ "num": 3,
+ "topics": [
+  {
+   "id": "3",
+   "title": "Breadth-first search",
+   "type": "Module",
+   "minutes": 25,
+   "outcome": "Trace BFS with a queue and explain marking",
+   "bloom": "Apply, Evaluate",
+   "concept": "BFS",
+   "goal": "Run BFS by hand and in Python, and explain why it marks a vertex the moment it's found. Covers objectives 3 and 4.",
+   "layout": "module",
+   "sections": [
+    {
+     "kind": "part",
+     "id": "s01",
+     "num": "01",
+     "title": "The idea: ripples on a pond",
+     "short": "Ripples on a pond",
+     "text": [
+      "Drop a pebble at A. The first ripple reaches the vertices **1 edge away** (B and C). The next ripple reaches those **2 edges away** (D and E).",
+      "BFS works the same way: it finishes every vertex at distance 1 before it touches anything at distance 2. These rings are called **levels**."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "Drop a pebble",
+       "caption": "Drop a pebble at A. A is level 0.",
+       "scene": {
+        "ripple": "A",
+        "rings": {
+         "A": 0
+        },
+        "highlight": [
+         "A"
+        ]
+       }
+      },
+      {
+       "label": "Level 1",
+       "caption": "The first ripple reaches B and C: level 1.",
+       "scene": {
+        "ripple": "A",
+        "rings": {
+         "A": 0,
+         "B": 1,
+         "C": 1
+        }
+       }
+      },
+      {
+       "label": "Level 2",
+       "caption": "The next ripple reaches D and E: level 2.",
+       "scene": {
+        "ripple": "A",
+        "rings": {
+         "A": 0,
+         "B": 1,
+         "C": 1,
+         "D": 2,
+         "E": 2
+        }
+       }
+      },
+      {
+       "label": "F is never reached",
+       "caption": "No ripple ever reaches F.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "dashed": [
+         "F"
+        ],
+        "focus": "F"
+       }
+      },
+      {
+       "label": "Level by level",
+       "caption": "BFS visits in exactly this order, level by level.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "chips": [
+         "Level 0: A",
+         "Level 1: B, C",
+         "Level 2: D, E"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "Which vertices are on level 2 from A?",
+     "a": "D and E.",
+     "why": "Each is exactly 2 edges from A: A → B → D and A → C → E."
+    },
+    {
+     "kind": "part",
+     "id": "s02",
+     "num": "02",
+     "title": "The queue: first in, first out",
+     "short": "The queue",
+     "text": [
+      "BFS keeps a **queue** of vertices waiting to be explored. A queue is a coffee-shop line: you join at the back, and the person at the front is served next. This is **FIFO**: first in, first out.",
+      "Level-1 vertices join the line before any level-2 vertex, so they're served first, and the ripple order follows.",
+      "A **stack** is the opposite: last in, first out (LIFO), like a pile of plates. Swap the queue for a stack and BFS stops going level by level."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "The line",
+       "caption": "BFS keeps a line called a queue. A is first in it.",
+       "scene": {
+        "waiting": [
+         "A"
+        ],
+        "line": {
+         "people": [
+          "A"
+         ]
+        }
+       }
+      },
+      {
+       "label": "Serve A",
+       "caption": "Serve A from the front. Its new neighbours, B and C, join at the back.",
+       "scene": {
+        "highlight": [
+         "A"
+        ],
+        "waiting": [
+         "B",
+         "C"
+        ],
+        "line": {
+         "people": [
+          "A",
+          "B",
+          "C"
+         ],
+         "serve": "A"
+        }
+       }
+      },
+      {
+       "label": "Serve B",
+       "caption": "Serve B. D joins behind C.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B"
+        ],
+        "waiting": [
+         "C",
+         "D"
+        ],
+        "line": {
+         "people": [
+          "B",
+          "C",
+          "D"
+         ],
+         "serve": "B",
+         "served": [
+          "A"
+         ]
+        }
+       }
+      },
+      {
+       "label": "Serve C",
+       "caption": "Serve C. E joins. D is already in line, so it doesn't join again.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C"
+        ],
+        "waiting": [
+         "D",
+         "E"
+        ],
+        "line": {
+         "people": [
+          "C",
+          "D",
+          "E"
+         ],
+         "serve": "C",
+         "served": [
+          "A",
+          "B"
+         ]
+        }
+       }
+      },
+      {
+       "label": "Empty line",
+       "caption": "Serve D, then E. The line is empty, so BFS stops.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "line": {
+         "people": [],
+         "served": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E"
+         ]
+        }
+       }
+      },
+      {
+       "label": "A stack",
+       "caption": "A stack serves the newest first. That would break the level order.",
+       "scene": {
+        "dim": true,
+        "stack": [
+         "B",
+         "C"
+        ],
+        "tag": "LIFO"
+       }
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "The queue is [B, C]. Which vertex is served next, and where does a newly found vertex go?",
+     "a": "B is served next, from the front.",
+     "why": "A newly found vertex joins at the back, after C."
+    },
+    {
+     "kind": "part",
+     "id": "s03",
+     "num": "03",
+     "title": "Mark a vertex as soon as it's found",
+     "short": "Mark when found",
+     "text": [
+      "BFS keeps a **found** set (often called *visited*), like a guestbook at the door. A vertex is written in the moment it **joins** the queue, not when it's served. That way it can never join twice.",
+      "Here's the bug if you mark when serving instead. From A, B and C join. B is served and adds D. C is served before D, and because D isn't marked yet, C adds D *again*. The queue becomes [D, D, E] and D is explored twice.",
+      "With no marking at all it's worse: A adds B, B adds A, A adds B, forever."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "The guestbook",
+       "caption": "The found set is like a guestbook. A signs in as it joins the line.",
+       "scene": {
+        "waiting": [
+         "A"
+        ],
+        "book": [
+         "A"
+        ],
+        "queueStrip": [
+         "A"
+        ]
+       }
+      },
+      {
+       "label": "B and C sign in",
+       "caption": "B and C sign in the moment they join.",
+       "scene": {
+        "highlight": [
+         "A"
+        ],
+        "waiting": [
+         "B",
+         "C"
+        ],
+        "book": [
+         "A",
+         "B",
+         "C"
+        ],
+        "queueStrip": [
+         "B",
+         "C"
+        ],
+        "serving": "A"
+       }
+      },
+      {
+       "label": "D signs in",
+       "caption": "B finds D, and D signs in straight away.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B"
+        ],
+        "waiting": [
+         "C",
+         "D"
+        ],
+        "book": [
+         "A",
+         "B",
+         "C",
+         "D"
+        ],
+        "queueStrip": [
+         "C",
+         "D"
+        ],
+        "serving": "B"
+       }
+      },
+      {
+       "label": "C checks the book",
+       "caption": "C sees D has already signed, so D isn't added again.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C"
+        ],
+        "waiting": [
+         "D",
+         "E"
+        ],
+        "book": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "queueStrip": [
+         "D",
+         "E"
+        ],
+        "serving": "C",
+        "focus": "D"
+       }
+      },
+      {
+       "label": "The bug",
+       "caption": "The bug: sign in only when served, and D joins the line twice.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C"
+        ],
+        "waiting": [
+         "D",
+         "E"
+        ],
+        "book": [
+         "A",
+         "B",
+         "C"
+        ],
+        "bookTitle": "Signed when served",
+        "queueStrip": [
+         "D",
+         "D",
+         "E"
+        ],
+        "serving": "C",
+        "tag": "Not yet: D twice"
+       }
+      },
+      {
+       "label": "Mark when found",
+       "caption": "Mark a vertex when it's found, not when it's served.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "book": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "tag": "mark when found"
+       }
+      }
+     ]
+    },
+    {
+     "kind": "codecompare",
+     "title": "Run both and compare",
+     "blocks": [
+      {
+       "label": "Marked when served (bug)",
+       "run": "bug",
+       "bad": true,
+       "source": [
+        "queue = deque([\"A\"])",
+        "found = set()",
+        "while queue:",
+        "    vertex = queue.popleft()",
+        "    found.add(vertex)  # late",
+        "    for n in graph[vertex]:",
+        "        if n not in found:",
+        "            queue.append(n)"
+       ]
+      },
+      {
+       "label": "Marked when found (correct)",
+       "run": "correct",
+       "source": [
+        "queue = deque([\"A\"])",
+        "found = {\"A\"}",
+        "while queue:",
+        "    vertex = queue.popleft()",
+        "    for n in graph[vertex]:",
+        "        if n not in found:",
+        "            found.add(n)  # now",
+        "            queue.append(n)"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "In correct BFS from A, when is D written into the found set?",
+     "a": "When B adds it to the queue (step 2).",
+     "why": "That's before C is served, so C sees D is already found and doesn't add it again."
+    },
+    {
+     "kind": "part",
+     "id": "s04",
+     "num": "04",
+     "title": "BFS from A, step by step",
+     "short": "Step by step",
+     "text": [
+      "Predict each row before you press Next step. Served vertices turn green, and vertices waiting in the queue are amber."
+     ]
+    },
+    {
+     "kind": "stepper",
+     "start": "A"
+    },
+    {
+     "kind": "part",
+     "id": "s05",
+     "num": "05",
+     "title": "The code",
+     "short": "The code",
+     "text": [
+      "The same steps in Python. `found` is the guestbook and `queue` is the line.",
+      "Pick a start vertex and press Run, or Step to go through the code line by line while the map and the queue change beside it."
+     ]
+    },
+    {
+     "kind": "codelab",
+     "title": "BFS in Python"
+    },
+    {
+     "kind": "quickcheck",
+     "q": "Which line stops a vertex joining the queue twice?",
+     "a": "if n not in found:",
+     "why": "Together with found.add(n) straight after it."
+    },
+    {
+     "kind": "part",
+     "id": "s06",
+     "num": "06",
+     "title": "Lab: Be the Queue",
+     "short": "Be the Queue",
+     "text": [
+      "Now you run BFS. Each round: serve the front of the queue, choose which neighbours join the back, and say how many edges each one is from the start. Serving from the back gets \"Stack order instead of queue order\", and you can try again."
+     ]
+    },
+    {
+     "kind": "queuegame",
+     "title": "Be the Queue",
+     "start": "A",
+     "intro": "Pick a start, then serve, choose who joins, and set their levels. Neighbours are checked in the order they're listed in the adjacency list."
+    },
+    {
+     "kind": "part",
+     "id": "s07",
+     "num": "07",
+     "title": "BFS compared with DFS",
+     "short": "BFS vs DFS",
+     "text": [
+      "Depth-first search (DFS) is the other common way to explore a graph. You'll meet it properly later in COS212; here's how it differs."
+     ]
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "",
+      "BFS",
+      "DFS (depth-first search)"
+     ],
+     "rows": [
+      [
+       "Waiting list",
+       "Queue (FIFO)",
+       "Stack or recursion (LIFO)"
+      ],
+      [
+       "How it moves",
+       "Level by level, outward",
+       "Down one path as far as it can, then backs up"
+      ],
+      [
+       "Order from A",
+       "A, B, C, D, E",
+       "A, B, D, C, E"
+      ],
+      [
+       "Finds fewest edges?",
+       "Yes, in an unweighted graph",
+       "Not guaranteed"
+      ]
+     ],
+     "rowHeaders": true
+    },
+    {
+     "kind": "part",
+     "id": "s08",
+     "num": "08",
+     "title": "How much work BFS does",
+     "short": "How much work",
+     "text": [
+      "Every reachable vertex joins the queue once, and each edge is looked at once from each end. So the work grows with **V + E** (vertices plus edges), written O(V + E).",
+      "For our graph that's 5 reachable vertices and 5 edges."
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s09",
+     "num": "09",
+     "title": "Practice exercises",
+     "short": "Exercises",
+     "text": [
+      "Longer questions. Try each one on paper first."
+     ]
+    },
+    {
+     "kind": "exercises",
+     "items": [
+      {
+       "q": "Run BFS from E. Write the visit order.",
+       "a": "E, C, A, D, B. E only knows C; C adds A and D; A adds B."
+      },
+      {
+       "q": "Run BFS from D and write the queue after each step.",
+       "a": "[B, C] → [C, A] → [A, E] → [E] → [ ]. Visit order D, B, C, A, E."
+      },
+      {
+       "q": "In your own words: why is a vertex marked when it joins the queue?",
+       "a": "Model answer: so another neighbour can't add it a second time before it's served."
+      },
+      {
+       "q": "Add the edge E–F. What changes in BFS from A?",
+       "a": "F is found from E on level 3, and the order becomes A, B, C, D, E, F."
+      },
+      {
+       "q": "The code uses deque.popleft(), not list.pop(0). Why?",
+       "a": "popleft takes the front straight off; pop(0) moves every other item along, which gets slow on big graphs."
+      }
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s10",
+     "num": "10",
+     "title": "Module 3 quiz",
+     "short": "Module quiz",
+     "text": [
+      "5 questions. Answer them all, then press Submit."
+     ]
+    },
+    {
+     "kind": "quiz",
+     "quiz": "m3quiz",
+     "mode": "module",
+     "questions": [
+      {
+       "id": "1",
+       "q": "What does BFS keep its waiting vertices in?",
+       "opts": [
+        "A stack",
+        "A queue",
+        "A sorted list",
+        "A heap"
+       ],
+       "ans": 1,
+       "no": "A queue: first in, first out, so earlier levels are served first.",
+       "see": "3",
+       "concept": "Queues",
+       "objective": 3,
+       "tags": [
+        "fifo_lifo",
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "2",
+       "q": "BFS from A: the queue is [C, D] and C is served. What is the queue now?",
+       "opts": [
+        "[D]",
+        "[D, E]",
+        "[E, D]",
+        "[D, D, E]"
+       ],
+       "ans": 1,
+       "no": "C finds E (A and D are already found). E joins at the back: [D, E].",
+       "see": "3",
+       "concept": "Queues",
+       "objective": 3,
+       "tags": [
+        null,
+        null,
+        "fifo_lifo",
+        "mark_on_serve"
+       ]
+      },
+      {
+       "id": "3",
+       "q": "When is a vertex marked as found?",
+       "opts": [
+        "When it's served",
+        "When it joins the queue",
+        "At the end",
+        "Never"
+       ],
+       "ans": 1,
+       "no": "Marking it when it joins stops it being added twice (see 03).",
+       "see": "3",
+       "concept": "Marking found",
+       "objective": 4,
+       "tags": [
+        "mark_on_serve",
+        null,
+        "mark_on_serve",
+        "duplicate"
+       ]
+      },
+      {
+       "id": "4",
+       "q": "What is the BFS order from B?",
+       "opts": [
+        "B, A, D, C, E",
+        "B, A, C, D, E",
+        "B, D, A, C, E",
+        "B, A, D, E, C"
+       ],
+       "ans": 0,
+       "no": "B adds A and D. A adds C. D adds nothing new. C adds E.",
+       "see": "3",
+       "concept": "BFS",
+       "objective": 3,
+       "tags": [
+        null,
+        "wrong_layer",
+        "fifo_lifo",
+        "wrong_layer"
+       ]
+      },
+      {
+       "id": "5",
+       "q": "What happens if BFS never marks vertices on our graph?",
+       "opts": [
+        "It's faster",
+        "It loops forever (A adds B, B adds A …)",
+        "It skips F",
+        "Nothing changes"
+       ],
+       "ans": 1,
+       "no": "Edges go both ways, so without marks A and B keep adding each other.",
+       "see": "3",
+       "concept": "Marking found",
+       "objective": 4,
+       "tags": [
+        "duplicate",
+        null,
+        null,
+        "duplicate"
+       ]
+      }
+     ]
+    }
+   ],
+   "recap": "BFS serves a queue from the front, adds new neighbours to the back, and marks each vertex the moment it's found.",
+   "next": "Module 4: using BFS to find the route with the fewest edges."
+  }
+ ]
+}

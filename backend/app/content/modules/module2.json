@@ -1,0 +1,408 @@
+{
+ "num": 2,
+ "topics": [
+  {
+   "id": "2",
+   "title": "Graphs",
+   "type": "Module",
+   "minutes": 15,
+   "outcome": "Read a graph from a picture and from Python",
+   "bloom": "Explain, Apply",
+   "concept": "Graphs",
+   "goal": "Read a graph from a picture and from Python, using the right words. Covers objectives 1 and 2.",
+   "layout": "module",
+   "sections": [
+    {
+     "kind": "part",
+     "id": "s01",
+     "num": "01",
+     "title": "What a graph is",
+     "short": "What a graph is",
+     "text": [
+      "A **graph** is a set of **vertices** (dots) joined by **edges** (lines). It only records *which* things are connected, not where they are or how far apart.",
+      "A road map, a group of friends and the links between web pages are all graphs."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "A map",
+       "caption": "A map with six buildings and the paths between them.",
+       "scene": {
+        "style": "buildings",
+        "edges": true
+       }
+      },
+      {
+       "label": "Buildings become vertices",
+       "caption": "Swap each building for a vertex.",
+       "scene": {
+        "style": "buildings",
+        "morph": true
+       }
+      },
+      {
+       "label": "Paths become edges",
+       "caption": "Swap each path for an edge.",
+       "scene": {
+        "drawEdges": true
+       }
+      },
+      {
+       "label": "Only connections",
+       "caption": "Distances and positions don't matter. Only who is connected.",
+       "scene": {
+        "shuffle": true,
+        "tag": "same graph"
+       }
+      },
+      {
+       "label": "Neighbours",
+       "caption": "C's neighbours are A, D and E. Its degree is 3.",
+       "scene": {
+        "focus": "C",
+        "highlight": [
+         "C"
+        ],
+        "waiting": [
+         "A",
+         "D",
+         "E"
+        ],
+        "edgeHighlight": [
+         [
+          "C",
+          "A"
+         ],
+         [
+          "C",
+          "D"
+         ],
+         [
+          "C",
+          "E"
+         ]
+        ],
+        "tag": "degree 3"
+       }
+      },
+      {
+       "label": "Isolated",
+       "caption": "F has no edges. It's an isolated vertex.",
+       "scene": {
+        "focus": "F",
+        "dashed": [
+         "F"
+        ],
+        "tag": "isolated"
+       }
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "How many vertices and how many edges does our graph have?",
+     "a": "6 vertices (A to F) and 5 edges (A–B, A–C, B–D, C–D, C–E)."
+    },
+    {
+     "kind": "part",
+     "id": "s02",
+     "num": "02",
+     "title": "Words you need",
+     "short": "Words you need",
+     "text": [
+      "These words come up in every graph question, in this course and in the lecture."
+     ]
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "Word",
+      "Meaning",
+      "In our graph"
+     ],
+     "rows": [
+      [
+       "Vertex",
+       "One dot. Also called a node",
+       "A, B, C, D, E, F"
+      ],
+      [
+       "Edge",
+       "A line joining two vertices",
+       "A–B is an edge"
+      ],
+      [
+       "Neighbours",
+       "Vertices joined by one edge",
+       "C's neighbours are A, D and E"
+      ],
+      [
+       "Degree",
+       "How many edges touch a vertex",
+       "C has degree 3; E has degree 1"
+      ],
+      [
+       "Path",
+       "A route along edges, with no vertex repeated",
+       "A → C → E"
+      ],
+      [
+       "Path length",
+       "The number of edges on the path (not vertices)",
+       "A → C → E has length 2"
+      ],
+      [
+       "Isolated vertex",
+       "A vertex with no edges",
+       "F"
+      ],
+      [
+       "Connected",
+       "Every vertex can reach every other",
+       "Not our graph, because of F"
+      ]
+     ],
+     "rowHeaders": true
+    },
+    {
+     "kind": "quickcheck",
+     "q": "What is the degree of D, and who are its neighbours?",
+     "a": "Degree 2. Its neighbours are B and C."
+    },
+    {
+     "kind": "part",
+     "id": "s03",
+     "num": "03",
+     "title": "Edges go both ways and cost the same",
+     "short": "Both ways, same cost",
+     "text": [
+      "Our edges are **undirected**: the edge A–B lets you go from A to B *and* from B to A, so B is in A's list and A is in B's list.",
+      "They are also **unweighted**: every edge counts as one step, so \"shortest\" means *fewest edges*.",
+      "Two other kinds exist. They're shown here once for contrast and not used again. **Directed** edges are one-way arrows, like a one-way street. **Weighted** edges carry a number, like a distance in km; shortest then means the smallest total, which needs a different algorithm (Dijkstra's), not BFS."
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "The edge C–E is undirected. Which two neighbour lists contain it?",
+     "a": "C's list has E, and E's list has C."
+    },
+    {
+     "kind": "part",
+     "id": "s04",
+     "num": "04",
+     "title": "Storing a graph in Python",
+     "short": "Graphs in Python",
+     "text": [
+      "We store the graph as an **adjacency list**: a dictionary where each vertex maps to the list of its neighbours.",
+      "An adjacency list only stores the edges that exist, so it stays small. The other common way is a grid of 0s and 1s with one row and one column per vertex (an **adjacency matrix**).",
+      "Press Run to see what the code prints, or try one of the tasks."
+     ]
+    },
+    {
+     "kind": "code",
+     "file": "graph.py",
+     "setup": null,
+     "source": [
+      "graph = {",
+      "    \"A\": [\"B\", \"C\"],",
+      "    \"B\": [\"A\", \"D\"],",
+      "    \"C\": [\"A\", \"D\", \"E\"],",
+      "    \"D\": [\"B\", \"C\"],",
+      "    \"E\": [\"C\"],",
+      "    \"F\": [],",
+      "}",
+      "",
+      "print(graph[\"C\"])        # the neighbours of C",
+      "print(len(graph[\"C\"]))   # the degree of C"
+     ],
+     "tasks": [
+      {
+       "q": "Predict, then run: what does graph[\"F\"] print?",
+       "run": "print(graph[\"F\"])",
+       "answer": "[]",
+       "why": "F has no neighbours: it's an isolated vertex."
+      },
+      {
+       "q": "Predict, then run: is A in D's list?",
+       "run": "print(\"A\" in graph[\"D\"])",
+       "answer": "False",
+       "why": "D's neighbours are B and C. A is two edges away from D."
+      },
+      {
+       "q": "Predict, then run: how many edges does the graph have?",
+       "run": "print(sum(len(n) for n in graph.values()) // 2)",
+       "answer": "5",
+       "why": "Each undirected edge is stored twice (once in each list), so the list lengths add up to 10."
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "What does graph[\"F\"] print, and what does that tell you?",
+     "a": "[] — F has no neighbours, so it's an isolated vertex."
+    },
+    {
+     "kind": "part",
+     "id": "s05",
+     "num": "05",
+     "title": "Practice exercises",
+     "short": "Exercises",
+     "text": [
+      "Longer questions. Try each one on paper first."
+     ]
+    },
+    {
+     "kind": "exercises",
+     "items": [
+      {
+       "q": "Write the adjacency list for the edges P–Q, P–R, Q–S.",
+       "a": "P: [Q, R], Q: [P, S], R: [P], S: [Q]."
+      },
+      {
+       "q": "A student writes \"A\": [\"B\"] but forgets to put A in B's list. What goes wrong?",
+       "a": "The graph now says you can go from A to B but not back. That makes it directed, which is wrong for an undirected edge."
+      },
+      {
+       "q": "Which vertex in our graph has the highest degree?",
+       "a": "C, with degree 3."
+      },
+      {
+       "q": "Is A → B → D → C a path, and how long is it?",
+       "a": "Yes. It has 3 edges, so its length is 3."
+      },
+      {
+       "q": "Name a real thing you'd model with directed edges, and one with weighted edges.",
+       "a": "Any sensible answer, e.g. social-media follows (directed) and road distances (weighted)."
+      }
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s06",
+     "num": "06",
+     "title": "Module 2 quiz",
+     "short": "Module quiz",
+     "text": [
+      "5 questions. Answer them all, then press Submit."
+     ]
+    },
+    {
+     "kind": "quiz",
+     "quiz": "m2quiz",
+     "mode": "module",
+     "questions": [
+      {
+       "id": "1",
+       "q": "What joins two vertices?",
+       "opts": [
+        "A queue",
+        "An edge",
+        "A path",
+        "A degree"
+       ],
+       "ans": 1,
+       "no": "An edge is one line between two vertices.",
+       "see": "2",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "2",
+       "q": "Who are B's neighbours?",
+       "opts": [
+        "A only",
+        "A and D",
+        "A, C and D",
+        "D only"
+       ],
+       "ans": 1,
+       "no": "B's list is [A, D]: one edge to each.",
+       "see": "2",
+       "concept": "Graphs in Python",
+       "objective": 2,
+       "tags": [
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "3",
+       "q": "Which vertex is isolated?",
+       "opts": [
+        "A",
+        "E",
+        "F",
+        "None of them"
+       ],
+       "ans": 2,
+       "no": "F has no edges at all. E has one edge (to C).",
+       "see": "2",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "4",
+       "q": "What does graph[\"E\"] hold?",
+       "opts": [
+        "['C']",
+        "['C', 'D']",
+        "1",
+        "[]"
+       ],
+       "ans": 0,
+       "no": "E's only neighbour is C.",
+       "see": "2",
+       "concept": "Graphs in Python",
+       "objective": 2,
+       "tags": [
+        null,
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "5",
+       "q": "In an unweighted graph, what does \"shortest route\" mean?",
+       "opts": [
+        "Shortest in km",
+        "Fewest edges",
+        "Fewest vertices",
+        "First in alphabetical order"
+       ],
+       "ans": 1,
+       "no": "Every edge counts as one step, so shortest = fewest edges.",
+       "see": "2",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        "length_is_cost",
+        null,
+        "count_places_not_edges",
+        null
+       ]
+      }
+     ]
+    }
+   ],
+   "recap": "A graph is vertices joined by edges. Ours are undirected and unweighted, and Python stores them as an adjacency list.",
+   "next": "Module 3: breadth-first search, the queue, and marking vertices as found."
+  }
+ ]
+}

@@ -1,0 +1,515 @@
+{
+ "num": 4,
+ "topics": [
+  {
+   "id": "4",
+   "title": "Shortest routes",
+   "type": "Module",
+   "minutes": 20,
+   "outcome": "Find the fewest-edges route and unreachable vertices",
+   "bloom": "Apply",
+   "concept": "Routes",
+   "goal": "Use BFS to find the route with the fewest edges, and spot vertices that can't be reached. Covers objective 5, and ends with the lecture-ready check.",
+   "layout": "module",
+   "sections": [
+    {
+     "kind": "part",
+     "id": "s01",
+     "num": "01",
+     "title": "Why BFS finds the fewest edges",
+     "short": "Why fewest edges",
+     "text": [
+      "Imagine the vertices as balls and the edges as strings of equal length. Lift the graph up by ball A and let it hang. Every ball hangs at a height equal to its fewest-edges distance from A.",
+      "BFS reads the graph the same way, one level down at a time. So the *first* time BFS finds a vertex, it has found it by a route with the fewest edges, because every shorter level was finished first."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "Balls and strings",
+       "caption": "Think of the vertices as balls and the edges as strings of equal length.",
+       "scene": {
+        "tag": "equal strings"
+       }
+      },
+      {
+       "label": "Lift by A",
+       "caption": "Lift the whole graph up by A.",
+       "scene": {
+        "hang": "move",
+        "focus": "A"
+       }
+      },
+      {
+       "label": "They settle",
+       "caption": "Each ball hangs at its fewest-edges distance from A.",
+       "scene": {
+        "hang": "on"
+       }
+      },
+      {
+       "label": "Levels",
+       "caption": "B and C hang one string down. D and E hang two.",
+       "scene": {
+        "hang": "on",
+        "rowLabels": true
+       }
+      },
+      {
+       "label": "F stays down",
+       "caption": "F isn't tied to anything, so it can't be lifted. It's unreachable.",
+       "scene": {
+        "hang": "on",
+        "rowLabels": true,
+        "dashed": [
+         "F"
+        ],
+        "focus": "F"
+       }
+      }
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "BFS first finds E on level 2. Could there be a route from A to E with only 1 edge?",
+     "a": "No.",
+     "why": "A 1-edge route would have put E on level 1, and level 1 is finished before level 2 starts."
+    },
+    {
+     "kind": "part",
+     "id": "s02",
+     "num": "02",
+     "title": "Remember where each vertex came from",
+     "short": "Parents",
+     "text": [
+      "To get the route, not just its length, BFS writes down a **parent** for every vertex it finds: the vertex that was being served when it was found."
+     ]
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "Vertex",
+      "B",
+      "C",
+      "D",
+      "E"
+     ],
+     "rows": [
+      [
+       "Parent (BFS from A)",
+       "A",
+       "A",
+       "B",
+       "C"
+      ]
+     ],
+     "rowHeaders": true
+    },
+    {
+     "kind": "quickcheck",
+     "q": "Why is D's parent B, not C?",
+     "a": "B is served before C, so B finds D first.",
+     "why": "When C is served, D is already found and nothing changes."
+    },
+    {
+     "kind": "part",
+     "id": "s03",
+     "num": "03",
+     "title": "Retrace the route backwards",
+     "short": "Retrace the route",
+     "text": [
+      "Start at the goal and follow parents back to the start, then reverse. For E: E → C → A, reversed: **A, C, E** (2 edges)."
+     ]
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "Parents",
+       "caption": "BFS remembers a parent for every vertex it finds.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "parents": {
+         "B": "A",
+         "C": "A",
+         "D": "B",
+         "E": "C"
+        }
+       }
+      },
+      {
+       "label": "Start at E",
+       "caption": "To find the route to E, start at E.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "parents": {
+         "B": "A",
+         "C": "A",
+         "D": "B",
+         "E": "C"
+        },
+        "focus": "E"
+       }
+      },
+      {
+       "label": "Follow parents back",
+       "caption": "Follow the parents back: E, C, A.",
+       "scene": {
+        "highlight": [
+         "A",
+         "B",
+         "C",
+         "D",
+         "E"
+        ],
+        "parents": {
+         "B": "A",
+         "C": "A",
+         "D": "B",
+         "E": "C"
+        },
+        "trail": [
+         "E",
+         "C",
+         "A"
+        ]
+       }
+      },
+      {
+       "label": "Turn it around",
+       "caption": "Turn it around: A, C, E. That's 2 edges.",
+       "scene": {
+        "path": [
+         "A",
+         "C",
+         "E"
+        ],
+        "highlight": [
+         "A",
+         "C",
+         "E"
+        ]
+       }
+      },
+      {
+       "label": "Two shortest routes",
+       "caption": "D has two shortest routes. BFS gives the one it found first.",
+       "scene": {
+        "path": [
+         "A",
+         "B",
+         "D"
+        ],
+        "trail": [
+         "A",
+         "C",
+         "D"
+        ],
+        "highlight": [
+         "A",
+         "D"
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "kind": "code",
+     "file": "shortest_path.py",
+     "setup": "graph",
+     "source": [
+      "from collections import deque",
+      "",
+      "def shortest_path(graph, start, goal):",
+      "    parent = {start: None}",
+      "    queue = deque([start])",
+      "    while queue:",
+      "        vertex = queue.popleft()",
+      "        if vertex == goal:",
+      "            break",
+      "        for n in graph[vertex]:",
+      "            if n not in parent:          # the parent map is also the found set",
+      "                parent[n] = vertex",
+      "                queue.append(n)",
+      "    if goal not in parent:",
+      "        return None                      # never found: can't be reached",
+      "    path = []",
+      "    while goal is not None:",
+      "        path.append(goal)",
+      "        goal = parent[goal]",
+      "    return path[::-1]",
+      "",
+      "print(shortest_path(graph, \"A\", \"E\"))"
+     ],
+     "tasks": [
+      {
+       "q": "Predict, then run: the route from A to D.",
+       "run": "print(shortest_path(graph, \"A\", \"D\"))",
+       "answer": "['A', 'B', 'D']",
+       "why": "B is served before C, so D's parent is B. A, C, D is just as short."
+      },
+      {
+       "q": "Predict, then run: the route from E to B.",
+       "run": "print(shortest_path(graph, \"E\", \"B\"))",
+       "answer": "['E', 'C', 'A', 'B']",
+       "why": "From E: C, then A and D, then B is found from A first."
+      },
+      {
+       "q": "Predict, then run: the route from A to F.",
+       "run": "print(shortest_path(graph, \"A\", \"F\"))",
+       "answer": "None",
+       "why": "F never gets a parent, so it can't be reached."
+      }
+     ]
+    },
+    {
+     "kind": "quiz",
+     "quiz": "route",
+     "mode": "check",
+     "title": "Quick check: type a route",
+     "questions": [
+      {
+       "id": "1",
+       "type": "route",
+       "q": "Type the shortest route from A to D.",
+       "start": "A",
+       "goal": "D",
+       "placeholder": "Type here",
+       "see": "4",
+       "concept": "Routes",
+       "objective": 5,
+       "tag": "wrong_layer",
+       "hints": [
+        "Which level is D on?",
+        "Follow D's parent back to A."
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s04",
+     "num": "04",
+     "title": "There can be more than one shortest route",
+     "short": "Ties",
+     "text": [
+      "A–B–D and A–C–D both have 2 edges. BFS gives A, B, D only because B comes before C in A's list.",
+      "Both answers are right, and the route checker accepts any route with the fewest edges."
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s05",
+     "num": "05",
+     "title": "Vertices you can't reach",
+     "short": "Can't reach",
+     "text": [
+      "F has no edges, so it never joins the queue, never gets a parent, and `shortest_path` returns `None`.",
+      "A vertex BFS never finds can't be reached from the start, however long you search."
+     ]
+    },
+    {
+     "kind": "quickcheck",
+     "q": "From which vertices can you reach F?",
+     "a": "None of the others.",
+     "why": "F can only \"reach\" itself."
+    },
+    {
+     "kind": "part",
+     "id": "s06",
+     "num": "06",
+     "title": "Count edges, not vertices, and not km",
+     "short": "Edges, not km",
+     "text": [
+      "The route A, C, E has 3 vertices but **2 edges**. Its length is 2.",
+      "BFS's \"shortest\" means fewest edges. If edges had distances in km (a weighted graph), the fewest edges might not be the shortest drive. That needs Dijkstra's algorithm, covered later in COS212."
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s07",
+     "num": "07",
+     "title": "Practice exercises",
+     "short": "Exercises",
+     "text": [
+      "Longer questions. Try each one on paper first."
+     ]
+    },
+    {
+     "kind": "exercises",
+     "items": [
+      {
+       "q": "Run BFS from E and write the parent map. Then give the route from E to B.",
+       "a": "C←E, A←C, D←C, B←A. Route E, C, A, B (3 edges)."
+      },
+      {
+       "q": "What is the shortest route from B to E, and its length?",
+       "a": "B, A, C, E: 3 edges. B, D, C, E is equally short."
+      },
+      {
+       "q": "A friend says the route A, C, E has length 3. What went wrong?",
+       "a": "They counted vertices. Length is the number of edges: 2."
+      },
+      {
+       "q": "Add the edge B–E. What does BFS give for A to E now?",
+       "a": "A, B, E. Still 2 edges, but now found through B because B is served first."
+      }
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s08",
+     "num": "08",
+     "title": "Lecture-ready check",
+     "short": "Lecture-ready check",
+     "text": [
+      "One question per objective (two for objective 5). After the last one you get your readiness report: each objective is marked **Ready** or **Review**, with a link back to the section and a Retry button."
+     ]
+    },
+    {
+     "kind": "quiz",
+     "quiz": "ready",
+     "mode": "ready",
+     "ask": true,
+     "title": "Lecture-ready check",
+     "questions": [
+      {
+       "id": "R1",
+       "q": "Which vertex has no edges?",
+       "opts": [
+        "A",
+        "E",
+        "F",
+        "None of them"
+       ],
+       "ans": 2,
+       "no": "F's list is empty. E has one edge, to C.",
+       "see": "2",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        null,
+        null,
+        null,
+        null
+       ],
+       "ok": "Yes. F is isolated."
+      },
+      {
+       "id": "R2",
+       "q": "What is graph[\"C\"]?",
+       "opts": [
+        "['A', 'D', 'E']",
+        "['A', 'B']",
+        "['D', 'E']",
+        "['A', 'C', 'D', 'E']"
+       ],
+       "ans": 0,
+       "no": "C is joined to A, D and E.",
+       "see": "2",
+       "concept": "Graphs in Python",
+       "objective": 2,
+       "tags": [
+        null,
+        null,
+        "one_way_edge",
+        null
+       ],
+       "ok": "Yes. C's neighbours are A, D and E."
+      },
+      {
+       "id": "R3",
+       "q": "What is the BFS order from C?",
+       "opts": [
+        "C, A, D, E, B",
+        "C, A, B, D, E",
+        "C, E, D, A, B",
+        "C, A, D, B, E"
+       ],
+       "ans": 0,
+       "no": "C adds A, D and E (level 1). Then A adds B (level 2).",
+       "see": "3",
+       "concept": "BFS",
+       "objective": 3,
+       "tags": [
+        null,
+        "wrong_layer",
+        "fifo_lifo",
+        "wrong_layer"
+       ],
+       "ok": "Yes. Level 1 is A, D, E; then B."
+      },
+      {
+       "id": "R4",
+       "type": "explain",
+       "q": "Explain in a sentence: why is D marked as found when B adds it to the queue?",
+       "model": "So C can't add D a second time: D is already in the found set when C is served.",
+       "no": "Have another look at section 03 of Module 3: the bug where D joins twice.",
+       "see": "3",
+       "concept": "Marking found",
+       "objective": 4,
+       "tag": "mark_on_serve"
+      },
+      {
+       "id": "R5",
+       "q": "What is the fewest number of edges from B to E?",
+       "opts": [
+        "2",
+        "3",
+        "4"
+       ],
+       "ans": 1,
+       "no": "B → A → C → E (or B → D → C → E): 3 edges.",
+       "see": "4",
+       "concept": "Routes",
+       "objective": 5,
+       "tags": [
+        "count_places_not_edges",
+        null,
+        "wrong_layer"
+       ],
+       "ok": "Yes. B, A, C, E is 3 edges."
+      },
+      {
+       "id": "R6",
+       "q": "Which vertices can't be reached from D?",
+       "opts": [
+        "None of them",
+        "F",
+        "E and F",
+        "B"
+       ],
+       "ans": 1,
+       "no": "Only F: it has no edges.",
+       "see": "4",
+       "concept": "Routes",
+       "objective": 5,
+       "tags": [
+        "unreachable",
+        null,
+        "wrong_layer",
+        null
+       ],
+       "ok": "Yes. Only F."
+      }
+     ]
+    }
+   ],
+   "recap": "BFS finds the fewest-edges route by remembering parents. A vertex it never finds can't be reached.",
+   "next": "You're ready for the lecture. Try the Full quiz to test everything together."
+  }
+ ]
+}

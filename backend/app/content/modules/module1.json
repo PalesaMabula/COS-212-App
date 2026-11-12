@@ -1,0 +1,254 @@
+{
+ "num": 1,
+ "topics": [
+  {
+   "id": "1",
+   "title": "Getting started",
+   "type": "Module",
+   "minutes": 6,
+   "outcome": "Know what the course answers and what you already know",
+   "bloom": null,
+   "concept": null,
+   "goal": "Know what the course answers, how the pages work, and what you already know.",
+   "layout": "module",
+   "sections": [
+    {
+     "kind": "part",
+     "id": "s01",
+     "num": "01",
+     "title": "The question this course answers",
+     "short": "The question",
+     "text": [
+      "You're at vertex A. What is the smallest number of edges you must cross to reach every other vertex, and which vertices can't you reach at all? **Breadth-first search (BFS)** answers this.",
+      "By the end of the four modules you can do the five things in the table. Each module says which ones it covers."
+     ]
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "#",
+      "By the end you can"
+     ],
+     "rows": [
+      [
+       "1",
+       "Describe a graph with the words vertex, edge and neighbour, and spot a vertex with no edges."
+      ],
+      [
+       "2",
+       "Read the neighbours of any vertex from a picture or a Python adjacency list."
+      ],
+      [
+       "3",
+       "Trace BFS with a queue, writing the queue down after every step."
+      ],
+      [
+       "4",
+       "Explain why a vertex is marked as found when it joins the queue, not when it leaves."
+      ],
+      [
+       "5",
+       "Find the route with the fewest edges, and name the vertices that can't be reached."
+      ]
+     ],
+     "rowHeaders": false
+    },
+    {
+     "kind": "video",
+     "chapters": [
+      {
+       "label": "A graph",
+       "caption": "Here is a graph: six vertices, A to F, joined by edges.",
+       "scene": {
+        "drawEdges": true
+       }
+      },
+      {
+       "label": "Start at A",
+       "caption": "You start at A.",
+       "scene": {
+        "highlight": [
+         "A"
+        ],
+        "focus": "A"
+       }
+      },
+      {
+       "label": "How far?",
+       "caption": "How many edges does it take to reach D? And E?",
+       "scene": {
+        "highlight": [
+         "A"
+        ],
+        "ask": [
+         "D",
+         "E"
+        ]
+       }
+      },
+      {
+       "label": "Can you reach F?",
+       "caption": "Can you reach F at all?",
+       "scene": {
+        "highlight": [
+         "A"
+        ],
+        "dashed": [
+         "F"
+        ],
+        "focus": "F"
+       }
+      },
+      {
+       "label": "BFS",
+       "caption": "Breadth-first search answers both questions.",
+       "scene": {
+        "title": "Breadth-first search",
+        "subtitle": "Fewest edges, and who can't be reached"
+       }
+      }
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s02",
+     "num": "02",
+     "title": "How to use these pages",
+     "short": "Using the pages",
+     "text": [
+      "Each module is one page of numbered sections. Work top to bottom, or jump to a section with the **Learning guide**.",
+      "Press the speaker beside a section title to hear that section. The word being read turns green.",
+      "Every **Quick check** has a Show solution button. Try first, then look.",
+      "**Practice** gives you new questions for any module, as many times as you like. The **Full quiz** tests all the modules together, with 15 new questions every time.",
+      "**Settings** changes text size, font, spacing, colours, motion and captions. Use any of them, for any reason."
+     ]
+    },
+    {
+     "kind": "part",
+     "id": "s03",
+     "num": "03",
+     "title": "Warm-up (no marks)",
+     "short": "Warm-up",
+     "text": [
+      "Six questions to see what you already know. Wrong answers are fine here: you get a one-line explanation, and the readiness report at the end of Module 4 compares your score with this one."
+     ]
+    },
+    {
+     "kind": "quiz",
+     "quiz": "warmup",
+     "mode": "warmup",
+     "title": "Warm-up",
+     "done_text": "Thanks, that's your starting point. Module 2 starts with graphs.",
+     "questions": [
+      {
+       "id": "W1",
+       "q": "Draw each building on a map as a dot and each walkway as a line. What do you get?",
+       "opts": [
+        "A graph",
+        "A table",
+        "A list"
+       ],
+       "ans": 0,
+       "after": "Dots joined by lines are a graph. Module 2 starts here.",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        null,
+        null,
+        null
+       ]
+      },
+      {
+       "id": "W2",
+       "q": "P, then Q, then R join a queue. Who is served first?",
+       "opts": [
+        "P",
+        "R",
+        "Whoever is closest"
+       ],
+       "ans": 0,
+       "after": "A queue serves whoever joined first. BFS relies on that (Module 3).",
+       "concept": "Queues",
+       "objective": 3,
+       "tags": [
+        null,
+        "fifo_lifo",
+        null
+       ]
+      },
+      {
+       "id": "W3",
+       "q": "How many edges do you cross on the route A → C → E?",
+       "opts": [
+        "1",
+        "2",
+        "3"
+       ],
+       "ans": 1,
+       "after": "Two edges: A–C and C–E. Count the lines, not the dots.",
+       "concept": "Routes",
+       "objective": 5,
+       "tags": [
+        null,
+        null,
+        "count_places_not_edges"
+       ]
+      },
+      {
+       "id": "W4",
+       "q": "An undirected edge joins B and D. Can you cross it from D to B?",
+       "opts": [
+        "Yes",
+        "No, only B to D"
+       ],
+       "ans": 0,
+       "after": "Undirected edges work both ways.",
+       "concept": "Graphs",
+       "objective": 1,
+       "tags": [
+        null,
+        "one_way_edge"
+       ]
+      },
+      {
+       "id": "W5",
+       "q": "Exploring outward from A, which do you visit first?",
+       "opts": [
+        "Vertices 1 edge away",
+        "Vertices 2 edges away",
+        "It doesn't matter"
+       ],
+       "ans": 0,
+       "after": "Closer vertices come first: that's the idea behind BFS.",
+       "concept": "BFS",
+       "objective": 3,
+       "tags": [
+        null,
+        "wrong_layer",
+        null
+       ]
+      },
+      {
+       "id": "W6",
+       "q": "F has no edges at all. Can you reach F from A?",
+       "opts": [
+        "Yes",
+        "No"
+       ],
+       "ans": 1,
+       "after": "With no edges, nothing leads to F. Module 4 looks at this.",
+       "concept": "Routes",
+       "objective": 5,
+       "tags": [
+        "unreachable",
+        null
+       ]
+      }
+     ]
+    }
+   ],
+   "recap": "You know the question BFS answers, how the pages work, and where you're starting from.",
+   "next": "Module 2: what a graph is, the words you need, and storing a graph in Python."
+  }
+ ]
+}

@@ -1,0 +1,234 @@
+{
+  "title": "Graphs and Breadth-First Search",
+  "code": "COS212",
+  "tagline": "Learn how a computer finds the route with the fewest edges, before the topic comes up in the COS212 lecture.",
+  "goal": "Arrive at the COS212 graphs lecture able to describe an undirected, unweighted graph and trace breadth-first search on it by hand.",
+  "facts": [
+    "Beginner, no graph knowledge needed",
+    "About 65 minutes",
+    "4 modules, one page each",
+    "Python examples"
+  ],
+  "lecture": {
+    "label": "",
+    "date": "",
+    "example": false
+  },
+  "about": [
+    "Maps, social networks and delivery apps all answer the same kind of question: how are things connected, and what is the quickest way from one to another? Computer scientists answer it with a graph, which is just dots joined by lines.",
+    "In this course you work with one small graph, six vertices named A to F, and learn breadth-first search: a method that explores outward one step at a time, like ripples on water. By the end you can trace it by hand and run it in Python."
+  ],
+  "ways": [
+    {
+      "title": "Watch",
+      "icon": "eye",
+      "text": "Silent, captioned animations show each idea moving."
+    },
+    {
+      "title": "Listen",
+      "icon": "headphones",
+      "text": "Press the speaker beside any section to hear it. The word being read turns green."
+    },
+    {
+      "title": "Read",
+      "icon": "text",
+      "text": "Short notes, one idea at a time, in plain English."
+    },
+    {
+      "title": "Try",
+      "icon": "hand",
+      "text": "Answer quick checks and practice questions, with feedback straight away."
+    },
+    {
+      "title": "Code",
+      "icon": "code",
+      "text": "Run real Python and step through it line by line."
+    }
+  ],
+  "modules": [
+    {
+      "num": 1,
+      "title": "Getting started",
+      "colour": "#f5f4f0",
+      "art": "play",
+      "summary": "The question BFS answers, how the pages work, and a no-marks warm-up to compare with later."
+    },
+    {
+      "num": 2,
+      "title": "Graphs",
+      "colour": "#8debc5",
+      "art": "graph",
+      "summary": "Vertices, edges, neighbours, degree, undirected and unweighted edges, and a graph stored in Python."
+    },
+    {
+      "num": 3,
+      "title": "Breadth-first search",
+      "colour": "#c9b6ff",
+      "art": "ripple",
+      "summary": "Ripples and levels, the queue, marking vertices when they're found, the BFS code, and Be the Queue."
+    },
+    {
+      "num": 4,
+      "title": "Shortest routes",
+      "colour": "#9fd3ff",
+      "art": "route",
+      "summary": "Why BFS gives the fewest edges, parents and retracing the route, unreachable vertices, and the lecture-ready check."
+    }
+  ],
+  "objectives": [
+    {
+      "num": 1,
+      "text": "Describe a graph using the words vertex, edge and neighbour, and spot an isolated vertex.",
+      "level": "Explain",
+      "practised": "Module 2 (01–03)",
+      "checked": "Module 2 quiz; check R1"
+    },
+    {
+      "num": 2,
+      "text": "List the neighbours of any vertex from a picture or a Python adjacency list.",
+      "level": "Apply",
+      "practised": "Module 2 (04)",
+      "checked": "Module 2 quiz; check R2"
+    },
+    {
+      "num": 3,
+      "text": "Trace breadth-first search with a queue, showing the queue after every step.",
+      "level": "Apply",
+      "practised": "Module 3 (01, 02, 04–06)",
+      "checked": "Module 3 quiz; check R3"
+    },
+    {
+      "num": 4,
+      "text": "Explain why a vertex is marked as found when it joins the queue.",
+      "level": "Evaluate",
+      "practised": "Module 3 (03)",
+      "checked": "Module 3 quiz; check R4"
+    },
+    {
+      "num": 5,
+      "text": "Find the route with the fewest edges, and identify vertices that can't be reached.",
+      "level": "Apply",
+      "practised": "Module 4 (01–06)",
+      "checked": "Route quick check; checks R5 and R6"
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Graph",
+      "meaning": "Vertices (dots) joined by edges (lines). It shows how things are connected.",
+      "topic": "2"
+    },
+    {
+      "term": "Vertex (node)",
+      "meaning": "A dot: one thing in the graph, such as A.",
+      "topic": "2"
+    },
+    {
+      "term": "Edge",
+      "meaning": "A line joining exactly two vertices, such as A–B.",
+      "topic": "2"
+    },
+    {
+      "term": "Neighbour",
+      "meaning": "A vertex one edge away.",
+      "topic": "2"
+    },
+    {
+      "term": "Degree",
+      "meaning": "How many edges touch a vertex. C has degree 3.",
+      "topic": "2"
+    },
+    {
+      "term": "Isolated vertex",
+      "meaning": "A vertex with no edges, like F.",
+      "topic": "2"
+    },
+    {
+      "term": "Undirected",
+      "meaning": "Edges work both ways.",
+      "topic": "2"
+    },
+    {
+      "term": "Unweighted",
+      "meaning": "Edges have no numbers on them. Every edge counts as one step.",
+      "topic": "2"
+    },
+    {
+      "term": "Adjacency list",
+      "meaning": "A dictionary from each vertex to the list of its neighbours.",
+      "topic": "2"
+    },
+    {
+      "term": "Queue",
+      "meaning": "A line: join at the back, served from the front. First in, first out (FIFO).",
+      "topic": "3"
+    },
+    {
+      "term": "Stack",
+      "meaning": "A pile: the newest item comes off first. Last in, first out (LIFO).",
+      "topic": "3"
+    },
+    {
+      "term": "Level",
+      "meaning": "All the vertices the same number of edges from the start.",
+      "topic": "3"
+    },
+    {
+      "term": "Found (visited)",
+      "meaning": "Marked the moment a vertex joins the queue, so it never joins twice.",
+      "topic": "3"
+    },
+    {
+      "term": "Breadth-first search (BFS)",
+      "meaning": "Explores outward level by level, using a queue.",
+      "topic": "3"
+    },
+    {
+      "term": "Parent",
+      "meaning": "The vertex being served when another vertex was found.",
+      "topic": "4"
+    },
+    {
+      "term": "Path length",
+      "meaning": "The number of edges on a route (not the number of vertices).",
+      "topic": "4"
+    },
+    {
+      "term": "Unreachable",
+      "meaning": "No chain of edges leads there from the start.",
+      "topic": "4"
+    }
+  ],
+  "default_questions": [
+    "Why is a vertex marked as found when it joins the queue, not when it's served?",
+    "What changes if the edges have distances, like kilometres?",
+    "How do we search a graph that's in separate pieces?"
+  ],
+  "checklist": [
+    {
+      "id": "warmup",
+      "text": "Did the warm-up",
+      "topic": "1"
+    },
+    {
+      "id": "watched",
+      "text": "Watched the BFS animations",
+      "topic": "3"
+    },
+    {
+      "id": "traced",
+      "text": "Played Be the Queue",
+      "topic": "3"
+    },
+    {
+      "id": "ranCode",
+      "text": "Ran BFS in Python",
+      "topic": "3"
+    },
+    {
+      "id": "readyCheck",
+      "text": "Took the lecture-ready check",
+      "topic": "4"
+    }
+  ]
+}

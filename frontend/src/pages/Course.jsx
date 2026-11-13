@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import Icon from '../components/ui/Icon';
 import ReadAloud, { useReadAloud } from '../components/ui/ReadAloud';
+import StartOver from '../components/ui/StartOver';
 import GlowLink from '../components/ui/GlowLink';
 import { Chip, Panel, Pill, Tag } from '../components/ui/primitives';
 import ModuleCard from '../components/dashboard/ModuleCard';
@@ -65,6 +66,7 @@ export default function Course() {
             <Icon name="play" />
             {p.next ? (p.doneCount ? `Continue with Module ${p.next.module}` : 'Start course') : 'Take the Full quiz'}
           </GlowLink>
+          {p.doneCount > 0 && <StartOver />}
         </div>
       </Hero>
 

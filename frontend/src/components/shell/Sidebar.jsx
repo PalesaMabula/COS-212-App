@@ -31,7 +31,7 @@ export function BrandMark({ size = 38 }) {
 }
 
 /** The learner card: click your name to change it. Saved with your progress (no login). */
-function Me({ doneCount, total }) {
+function Me() {
   const { name } = profileStore.use();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(name);
@@ -106,9 +106,7 @@ function Me({ doneCount, total }) {
             <span className="sr-only">, change your name</span>
           </button>
         )}
-        <p className="small muted">
-          Guest · {doneCount} of {total} sections done
-        </p>
+        
       </div>
     </div>
   );
@@ -117,7 +115,7 @@ function Me({ doneCount, total }) {
 export default function Sidebar() {
   const { pathname, search } = useLocation();
   const current = activeKey(pathname, search);
-  const { next, doneCount, topics } = useProgress();
+  const { next } = useProgress();
   const course = useCourse();
   const modNow = pathname.startsWith('/module/') ? pathname.split('/')[2] : null;
   // On phones the menu folds away behind a button (CSS only applies this under 760px).
@@ -143,7 +141,7 @@ export default function Sidebar() {
           </Button>
         </div>
         <div id="side-more" className="more">
-          <Me doneCount={doneCount} total={topics.length} />
+          <Me  />
 
           <nav className="nav" aria-label="Pages">
             {NAV.map((n) => (

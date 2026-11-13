@@ -67,6 +67,15 @@ def delete_key(learner_id: str, key: str):
     return {"deleted": db.delete(_id(learner_id), _key(key))}
 
 
+START_OVER_KEYS = ("topics", "progress", "answers")
+
+
+@router.post("/{learner_id}/start-over", summary="Start the course again: clear progress, answers and quiz history (keeps name, settings, plans)")
+def start_over(learner_id: str):
+    lid = _id(learner_id)
+    return {"cleared": [k for k in START_OVER_KEYS if db.delete(lid, k)]}
+
+
 @router.delete("/{learner_id}", summary="Clear everything for this guest")
 def delete_learner(learner_id: str):
     return {"deleted": db.delete(_id(learner_id))}

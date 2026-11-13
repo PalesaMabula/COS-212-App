@@ -1,5 +1,6 @@
 import { useId, useState } from 'react';
 import styled from 'styled-components';
+import StartOver from '../components/ui/StartOver';
 import Icon from '../components/ui/Icon';
 import SliderSwitch from '../components/ui/SliderSwitch';
 import { Button, Choices, Panel, Tag } from '../components/ui/primitives';
@@ -111,6 +112,7 @@ export default function Settings() {
             <p className="small muted">
               Tracking powers My analysis. It’s saved with your anonymous guest copy of the course (no name, no login) and is never shared.
             </p>
+            <StartOver style={{ alignSelf: 'flex-start' }} />
             <Button onClick={clearAll} style={{ alignSelf: 'flex-start' }}>
               <Icon name="x" size={18} />
               Clear all my progress and data

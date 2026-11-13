@@ -90,7 +90,7 @@ function Search() {
       <input
         id="site-search"
         type="search"
-        placeholder="Search modules, animations and words"
+        placeholder="Search modules"
         autoComplete="off"
         value={q}
         role="combobox"

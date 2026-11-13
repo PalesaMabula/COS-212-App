@@ -16,12 +16,78 @@
      "kind": "part",
      "id": "s01",
      "num": "01",
-     "title": "What a graph is",
+     "title": "What a graph is: undirected and unweighted",
      "short": "What a graph is",
      "text": [
-      "A **graph** is a set of **vertices** (dots) joined by **edges** (lines). It only records *which* things are connected, not where they are or how far apart.",
-      "A road map, a group of friends and the links between web pages are all graphs."
+      "A **graph** is a set of **vertices** (dots) joined by **edges** (lines). It only records *which* things are connected, not where they are or how far apart. A road map, a group of friends and the links between web pages are all graphs.",
+      "In this course every graph is **undirected**. An undirected edge is a two-way connection: if A is joined to B, then B is joined to A, and you can cross the edge in either direction. Think of a friendship: if Sam is Alex's friend, Alex is Sam's friend too. There are no arrows on the lines.",
+      "Every graph here is also **unweighted**. The edges carry no numbers such as distances, times or prices, so each edge counts as exactly **one step**. A long line and a short line in the picture cost the same. That is why, in this course, \"shortest route\" always means the route that crosses the **fewest edges**.",
+      "Together: an undirected, unweighted graph only answers two questions. Which vertices are joined? And how many edges must you cross to get from one to another? Breadth-first search answers the second question."
      ]
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "",
+      "Undirected (our graphs)",
+      "Directed (not used here)"
+     ],
+     "rows": [
+      [
+       "An edge looks like",
+       "A plain line: A – B",
+       "An arrow: A → B"
+      ],
+      [
+       "You can travel",
+       "Both ways, A to B and B to A",
+       "Only the way the arrow points"
+      ],
+      [
+       "Stored in Python",
+       "B in A's list and A in B's list",
+       "B in A's list only"
+      ],
+      [
+       "Everyday example",
+       "Friendship, a two-way road",
+       "Following someone online, a one-way street"
+      ]
+     ],
+     "rowHeaders": true,
+     "title": "Undirected compared with directed"
+    },
+    {
+     "kind": "compare",
+     "headers": [
+      "",
+      "Unweighted (our graphs)",
+      "Weighted (not used here)"
+     ],
+     "rows": [
+      [
+       "An edge carries",
+       "Nothing: it just joins two vertices",
+       "A number, e.g. 5 km or 3 minutes"
+      ],
+      [
+       "The cost of crossing an edge",
+       "Always 1 step",
+       "The number on the edge"
+      ],
+      [
+       "\"Shortest\" means",
+       "Fewest edges",
+       "Smallest total of the numbers"
+      ],
+      [
+       "Found by",
+       "Breadth-first search",
+       "Other algorithms, e.g. Dijkstra's"
+      ]
+     ],
+     "rowHeaders": true,
+     "title": "Unweighted compared with weighted"
     },
     {
      "kind": "video",
@@ -106,6 +172,12 @@
      "a": "6 vertices (A to F) and 5 edges (A–B, A–C, B–D, C–D, C–E)."
     },
     {
+     "kind": "quickcheck",
+     "q": "Our graph is undirected and unweighted. Can you go from D to B, and how much does crossing B–D cost?",
+     "a": "Yes, you can go from D to B, and it costs 1 step.",
+     "why": "Undirected means every edge works both ways. Unweighted means every edge counts as exactly one step, however long it is drawn."
+    },
+    {
      "kind": "part",
      "id": "s02",
      "num": "02",
@@ -178,9 +250,9 @@
      "title": "Edges go both ways and cost the same",
      "short": "Both ways, same cost",
      "text": [
-      "Our edges are **undirected**: the edge A–B lets you go from A to B *and* from B to A, so B is in A's list and A is in B's list.",
-      "They are also **unweighted**: every edge counts as one step, so \"shortest\" means *fewest edges*.",
-      "Two other kinds exist. They're shown here once for contrast and not used again. **Directed** edges are one-way arrows, like a one-way street. **Weighted** edges carry a number, like a distance in km; shortest then means the smallest total, which needs a different algorithm (Dijkstra's), not BFS."
+      "Section 01 introduced undirected, unweighted graphs. Here's what that means when you read or store one.",
+      "Because the edge A–B is **undirected**, it appears **twice** in the adjacency list: B is in A's list and A is in B's list. If one of the two is missing, the edge only works one way, which is a common mistake.",
+      "Because the graph is **unweighted**, how long an edge is drawn tells you nothing. Count edges, not centimetres: every edge is one step."
      ]
     },
     {

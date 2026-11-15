@@ -7,6 +7,7 @@ the server with a clear message instead of breaking a screen. Cross-checks
 loader.py.
 """
 
+import string
 from typing import Annotated, Literal, Union
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -85,6 +86,97 @@ class ChecklistItem(Strict):
     topic: str
 
 
+class ModeInsight(Strict):
+    """What My analysis says when this way of learning is the one used most (or least: stretch)."""
+    head: str
+    body: str
+    tips: list[str] = Field(min_length=1)
+    stretch: str
+
+
+class ConceptLink(Strict):
+    """A concept shown in My analysis and the part of a module page that teaches it."""
+    name: str
+    topic: str
+    go: str
+    question: str | None = None  # a question to bring to the lecture if this concept needs work
+
+
+class AnalysisLimits(Strict):
+    plan: int = Field(3, ge=1)
+    slips: int = Field(3, ge=1)
+    slipsPerConcept: int = Field(2, ge=1)
+    questions: int = Field(3, ge=1)  # suggested lecture questions (the student's own are always added)
+
+
+class AnalysisWording(Strict):
+    """Sentences My analysis builds. {braces} are filled in from the student's own data."""
+    adviceReview: str
+    adviceReviewPlain: str
+    adviceReady: str
+    adviceNotChecked: str
+    adviceSlip: str
+    focusWeakest: str
+    focusSlip: str
+    planSlip: str
+    planReview: str
+    planNext: str
+    planReadyCheck: str
+    planQuestion: str
+    planPractise: str
+    goalGood: str
+    goalReview: str
+    goalNotChecked: str
+    compareBoth: str
+    compareNoWarmup: str
+    compareNow: str
+
+    @model_validator(mode="after")
+    def check_placeholders(self):
+        # Each sentence may only use the {names} the code fills in, so a typo is caught at start-up.
+        allowed = {
+            "adviceReview": {"stretch"}, "focusWeakest": {"name", "right", "total"}, "focusSlip": {"title", "count"},
+            "planSlip": {"module", "title"}, "planReview": {"module", "title", "concept"}, "planNext": {"module", "title"},
+            "planReadyCheck": {"module"}, "planPractise": {"module", "concept"}, "compareBoth": {"now", "total", "warm", "warm_total"},
+            "compareNoWarmup": {"now", "total", "warm", "warm_total", "module"}, "compareNow": {"now", "total", "warm", "warm_total"},
+        }
+        for field in type(self).model_fields:
+            names = {n for _, n, _, _ in string.Formatter().parse(getattr(self, field)) if n}
+            bad = names - allowed.get(field, set())
+            if bad:
+                raise ValueError(f"analysis.wording.{field} uses unknown placeholder(s): {', '.join(sorted(bad))}")
+        return self
+
+
+class AnalysisConfig(Strict):
+    """Everything My analysis and the readiness report say or decide, kept out of the code."""
+    reviewBelow: int = Field(70, ge=0, le=100)  # a concept under this % correct is marked Review
+    minMinutes: int = Field(5, ge=0)  # study time needed before describing how the student studies
+    readyNote: str
+    emptyMessage: str
+    notEnoughHead: str
+    limits: AnalysisLimits = AnalysisLimits()
+    concepts: list[ConceptLink] = Field(min_length=1)
+    aliases: dict[str, str] = {}  # old concept names in saved data -> current names
+    practiceSources: list[str] = []  # attempt-log sources counted towards concept accuracy
+    practiceKinds: dict[str, str] = {}  # practice question kind -> concept
+    modes: dict[str, ModeInsight] = Field(min_length=1)  # the ways of learning, in display order
+    wording: AnalysisWording
+
+    @model_validator(mode="after")
+    def check_names(self):
+        names = [c.name for c in self.concepts]
+        if len(names) != len(set(names)):
+            raise ValueError("analysis.concepts: duplicate concept names")
+        for kind, c in self.practiceKinds.items():
+            if c not in names:
+                raise ValueError(f"analysis.practiceKinds.{kind}: unknown concept '{c}'")
+        for old, new in self.aliases.items():
+            if new not in names:
+                raise ValueError(f"analysis.aliases.{old}: unknown concept '{new}'")
+        return self
+
+
 class Course(Strict):
     title: str
     code: str
@@ -99,6 +191,7 @@ class Course(Strict):
     glossary: list[GlossaryItem]
     default_questions: list[str]
     checklist: list[ChecklistItem]
+    analysis: AnalysisConfig
 
 
 # ------------------------------ sections ------------------------------

@@ -5,8 +5,8 @@ import { Panel, Pill } from '../ui/primitives';
 import { trackStore, weekSummary } from '../../data/stores';
 
 /*
- * Minutes studied each day this week, from tracking. Until anything has been
- * tracked it shows the sample week from the design, clearly labelled.
+ * Minutes studied each day this week, from the student's own tracked time.
+ * Nothing is made up: an empty week shows zeros and a short prompt to start.
  * The chart has a full text alternative (aria-label) and visible numbers.
  */
 export default function WeekChart() {
@@ -23,7 +23,7 @@ export default function WeekChart() {
         icon="chart"
         right={
           <span style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {w.isSample && <Pill $tone="warn">Sample week</Pill>}
+            {w.isEmpty && <Pill $tone="warn">Nothing tracked yet</Pill>}
             <Link to="/analysis" className="small">
               Full analysis
             </Link>
@@ -33,7 +33,7 @@ export default function WeekChart() {
         This week
       </SectionTitle>
 
-      <div className="bars" role="img" aria-label={`Minutes studied this week${w.isSample ? ' (sample)' : ''}: ${described}`}>
+      <div className="bars" role="img" aria-label={`Minutes studied this week: ${described}`}>
         {w.bars.map((b, i) => (
           <div key={b.short} className={`bar${i === peak && b.mins > 0 ? ' hi' : ''}`} aria-hidden="true">
             <span className="small">{b.mins}</span>
@@ -43,10 +43,22 @@ export default function WeekChart() {
         ))}
       </div>
 
-      <p className="small">
-        <strong>{w.total} minutes</strong> this week. You spent the most time <strong>{w.topMode.toLowerCase()}</strong>
-        {w.topMode === 'Listening' ? ' to notes' : ''}.
-      </p>
+      {w.isEmpty ? (
+        <p className="small muted">
+          No study time this week yet. <Link to="/module/1">Start with Module 1</Link>, or jump into any module.
+        </p>
+      ) : (
+        <p className="small">
+          <strong>{w.total} minutes</strong> this week.
+          {w.topMode && (
+            <>
+              {' '}
+              You spent the most time <strong>{w.topMode.toLowerCase()}</strong>
+              {w.topMode === 'Listening' ? ' to notes' : ''}.
+            </>
+          )}
+        </p>
+      )}
     </Wrap>
   );
 }

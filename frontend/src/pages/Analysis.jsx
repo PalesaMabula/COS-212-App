@@ -38,8 +38,19 @@ export default function Analysis() {
     load();
   }, [load]);
 
-  const insight = a ? `${a.insight.head} ${a.insight.body}` : '';
-  usePage('My analysis', a ? `My analysis. ${insight} Ideas that build on what you've been doing: ${a.insight.tips.join(' ')} To stretch yourself: ${a.insight.stretch}` : 'My analysis.');
+  const pageText = a
+    ? [
+        'My analysis.',
+        a.insight.head,
+        a.insight.body,
+        a.insight.focus,
+        a.insight.tips.length ? `Ideas that build on what you've been doing: ${a.insight.tips.join(' ')}` : '',
+        a.insight.stretch ? `To stretch yourself: ${a.insight.stretch}` : '',
+      ]
+        .filter(Boolean)
+        .join(' ')
+    : 'My analysis.';
+  usePage('My analysis', pageText);
 
   const clearTracked = async () => {
     trackStore.reset();
@@ -85,11 +96,15 @@ export default function Analysis() {
           <ReadAloud id="anIntro" muted={[0]} label="the introduction" parts={[{ text: 'How you’ve studied so far, what’s working, and how to prepare for the lecture. This is about habits, not marks.' }]} />
         </div>
         <div style={{ flex: '1 1 260px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {a.sample ? <Pill $tone="warn">Showing a sample week</Pill> : <Pill $tone="ok">Showing your tracked time</Pill>}
-          <p className="small muted">
-            {a.sample ? 'Nothing tracked yet. Study a topic and your own numbers replace the sample.' : 'Worked out by the Python server from your study time and answers.'}
-          </p>
-          <Button onClick={clearTracked} style={{ alignSelf: 'flex-start' }}>
+          {a.empty ? <Pill $tone="warn">Nothing tracked yet</Pill> : <Pill $tone="ok">Showing your tracked time</Pill>}
+          <p className="small muted">{a.empty ? a.message : 'Worked out by the Python server from your study time and answers.'}</p>
+          {a.empty && (
+            <ButtonLink as={Link} to="/module/1" style={{ alignSelf: 'flex-start' }}>
+              <Icon name="book" size={18} />
+              Start Module 1
+            </ButtonLink>
+          )}
+          <Button onClick={clearTracked} disabled={a.empty} style={{ alignSelf: 'flex-start' }}>
             <Icon name="x" size={18} />
             Clear my tracked time
           </Button>
@@ -108,7 +123,7 @@ export default function Analysis() {
           <p style={{ fontWeight: 700, fontSize: '1.18rem' }}>
             <Icon name="trophy" size={20} /> {a.report.comparison}
           </p>
-          <p className="small">You compared with your own warm-up, not with anyone else. Ready is based on your answers, not on time spent.</p>
+          <p className="small">You compared with your own warm-up, not with anyone else. {a.report.note}</p>
         </Feedback>
       )}
 
@@ -207,7 +222,10 @@ export default function Analysis() {
             </Button>
           </div>
           <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-            <p style={{ fontWeight: 700, marginBottom: 8 }}>Goal by goal</p>
+            <p style={{ fontWeight: 700, marginBottom: 4 }}>Goal by goal</p>
+            <p className="small muted" style={{ marginBottom: 8 }}>
+              {a.report ? 'From your lecture-ready check.' : 'From your answers so far. The lecture-ready check gives the final word.'}
+            </p>
             <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {a.goals.map((g) => (
                 <li key={g.num} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center' }}>
@@ -220,18 +238,30 @@ export default function Analysis() {
                       </span>
                     )}
                   </span>
-                  <Pill $tone={TONE[g.status] || 'none'}>{g.status}</Pill>
+                  <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, flexShrink: 0 }}>
+                    <Pill $tone={g.tone || TONE[g.status] || 'none'} style={{ whiteSpace: 'nowrap' }}>
+                      {g.status}
+                    </Pill>
+                    {g.see && (
+                      <Link to={`/module/${g.see}`} className="small">
+                        Review
+                      </Link>
+                    )}
+                  </span>
                 </li>
               ))}
             </ul>
             {!a.report && (
-              <ButtonLink as={Link} to="/module/4?go=s08" style={{ marginTop: 12 }}>
+              <ButtonLink as={Link} to={`/module/${a.ready_link}`} style={{ marginTop: 12 }}>
                 Take the lecture-ready check <Icon name="arrow" size={18} />
               </ButtonLink>
             )}
           </div>
           <div style={{ flex: '1 1 300px', minWidth: 0 }}>
-            <p style={{ fontWeight: 700, marginBottom: 8 }}>Questions to bring</p>
+            <p style={{ fontWeight: 700, marginBottom: 4 }}>Questions to bring</p>
+            <p className="small muted" style={{ marginBottom: 8 }}>
+              Picked for the topics you’re finding hardest, plus any you wrote.
+            </p>
             <ol style={{ margin: 0, paddingLeft: 22, display: 'flex', flexDirection: 'column', gap: 6 }}>
               {a.questions.map((q) => (
                 <li key={q}>{q}</li>
@@ -246,23 +276,32 @@ export default function Analysis() {
 
 /** "What this suggests": one speaker reads the summary, the ideas and the stretch tip. */
 function Insight({ insight }) {
-  const parts = useMemo(
-    () => [{ lead: insight.head, text: insight.body }, ...insight.tips.map((text) => ({ text })), { lead: 'Stretch yourself:', text: insight.stretch }],
-    [insight]
-  );
+  const tips = insight.tips || [];
+  const parts = useMemo(() => {
+    const p = [{ lead: insight.head, text: insight.body }];
+    if (insight.focus) p.push({ lead: 'Your focus:', text: insight.focus });
+    (insight.tips || []).forEach((text) => p.push({ text }));
+    if (insight.stretch) p.push({ lead: 'Stretch yourself:', text: insight.stretch });
+    return p;
+  }, [insight]);
   const ra = useReadAloud('insight', parts, { label: 'what this suggests' });
-  const last = parts.length - 1;
+  const first = insight.focus ? 2 : 1; // index of the first tip
   return (
     <>
       <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
         {ra.button}
         {ra.part(0)}
       </div>
-      <p style={{ fontWeight: 700 }}>Ideas that build on what you’ve been doing</p>
-      <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {insight.tips.map((_, i) => ra.part(i + 1, { as: 'li' }))}
-      </ul>
-      <Feedback $tone="soft">{ra.part(last)}</Feedback>
+      {insight.focus && <Feedback $tone="soft">{ra.part(1)}</Feedback>}
+      {tips.length > 0 && (
+        <>
+          <p style={{ fontWeight: 700 }}>Ideas that build on what you’ve been doing</p>
+          <ul style={{ margin: 0, paddingLeft: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {tips.map((_, i) => ra.part(first + i, { as: 'li' }))}
+          </ul>
+        </>
+      )}
+      {insight.stretch && <Feedback $tone="soft">{ra.part(parts.length - 1)}</Feedback>}
     </>
   );
 }

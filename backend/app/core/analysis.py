@@ -1,5 +1,5 @@
 """
-My analysis and the readiness report (end of Module 4), worked out from what the student did.
+My analysis and the readiness report, worked out only from what the student did.
 
 Inputs (all saved per guest):
     answers    every checked answer, recorded by the server (first try and latest)
@@ -7,8 +7,14 @@ Inputs (all saved per guest):
     topics     modules the student finished
     questions  questions the student wrote for the lecture
 
-Readiness rules (from the course content, the lecture-ready check). Time spent is never part of it:
-    Ready      the question was right (R4: self-rated "Got it")
+Nothing about the course is written here. The concepts, where each is taught, the
+wording of insights and tips, the thresholds and limits all come from the "analysis"
+block in content/course.json. Which misconceptions belong to which objective comes
+from content/misconceptions.json. There is no sample data: a student with no data
+gets an empty state, never invented numbers.
+
+Readiness rules (the lecture-ready check). Time spent is never part of it:
+    Ready      the question was right (an explain question: self-rated "Got it")
     Review     not right yet
 An objective marked Review becomes Ready if a "Retry this objective" question is
 answered right. The comparison is ipsative: the student against their own warm-up only.
@@ -19,60 +25,28 @@ from datetime import date, timedelta
 
 from ..content import loader
 
-MODES = ["Watching", "Listening", "Reading", "Trying", "Coding", "Practising"]
-CONCEPTS = ["Graphs", "Graphs in Python", "Queues", "BFS", "Marking found", "Routes"]
-# Where each concept is taught: (module, part).
-CONCEPT_TOPIC = {"Graphs": "2", "Graphs in Python": "2", "Queues": "3", "BFS": "3", "Marking found": "3", "Routes": "4"}
-CONCEPT_PART = {"Graphs": "s02", "Graphs in Python": "s04", "Queues": "s02", "BFS": "s04", "Marking found": "s03", "Routes": "s03"}
-# Practice and Full quiz questions: the concept each kind of question checks.
-KIND_CONCEPT = {"nbr": "Graphs in Python", "degree": "Graphs", "iso": "Graphs", "routeLen": "Graphs", "order": "BFS",
-                "queue": "Queues", "level": "BFS", "bug": "Marking found", "hops": "Routes", "route": "Routes",
-                "reach": "Routes", "parent": "Routes"}
-# Older lesson data used this name for the code lab.
-CONCEPT_ALIASES = {"BFS in Python": "BFS"}
+WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-SAMPLE = {
-    "modes": {"Watching": 540, "Listening": 1260, "Reading": 600, "Trying": 480, "Coding": 300, "Practising": 660},
-    "concepts": {"Graphs": 900, "Graphs in Python": 300, "Queues": 600, "BFS": 1500, "Marking found": 240, "Routes": 300},
-    "acc": {"Graphs": [5, 6], "Graphs in Python": [2, 2], "Queues": [4, 5], "BFS": [6, 10], "Marking found": [1, 2], "Routes": [0, 0]},
-    "week": [12, 0, 18, 25, 9, 0, 0],
-}
 
-INSIGHTS = {
-    "Watching": ("You've spent most of your time watching.", "Most of your time went to the animations.",
-                 ["Pause at each chapter and predict what happens next before you press play.",
-                  "Sketch graph A–F and colour it in as the animation plays.",
-                  "Replay \u201cThe queue is a line\u201d (Module 3, section 02) before the lecture."]),
-    "Listening": ("You've spent most of your time listening.", "Most of your time went to the notes read aloud.",
-                  ["Play the notes at 1.25× while you trace BFS on paper.",
-                   "Use the microphone to explain each step out loud, then compare with the model answer.",
-                   "Listen to Module 3 once more on the way to class."]),
-    "Reading": ("You've spent most of your time reading.", "Most of your time went to the written notes.",
-                ["Rewrite the BFS recipe in your own words in three lines.",
-                 "Turn the glossary into flashcards and test yourself.",
-                 "Read the BFS code line by line in the Code lab."]),
-    "Trying": ("You've spent most of your time trying things.", "Most of your time went to trial and error on the map.",
-               ["Do a Mixed practice round: every round has a new graph.",
-                "When you miss one, say why the wrong answer fails before moving on.",
-                "Use Next step in Module 3, section 04, and predict each row first."]),
-    "Coding": ("You've spent most of your time coding.", "Most of your time went to the code labs.",
-               ["Predict the printed output before you press Run.",
-                "Change the start vertex and run it again.",
-                "Add a new vertex to the graph dictionary and see what changes."]),
-    "Practising": ("You've spent most of your time practising.", "Most of your time went to practice questions.",
-                   ["Try the Full quiz: 15 new questions across all modules.",
-                    "For any miss, press Show me in the lesson and watch that step.",
-                    "Practise the module you scored lowest on first."]),
-}
+def _cfg():
+    return loader.course().analysis
 
-STRETCH = {
-    "Watching": "Watch one animation and pause at each chapter to predict what comes next.",
-    "Listening": "Press a speaker on the notes and trace along on paper as you listen.",
-    "Reading": "Read the notes on screen once without audio, then summarise them in one line.",
-    "Trying": "Spend five minutes in Be the Queue (Module 3, section 06), where it's fine to get it wrong.",
-    "Coding": "Open a code lab and press Step five times while watching the queue.",
-    "Practising": "Do a practice round straight after an animation.",
-}
+
+def _modes() -> list[str]:
+    return list(_cfg().modes)
+
+
+def _concept_names() -> list[str]:
+    return [c.name for c in _cfg().concepts]
+
+
+def _concept_link(name: str) -> tuple[str, str]:
+    c = next(c for c in _cfg().concepts if c.name == name)
+    return c.topic, c.go
+
+
+def _alias(name: str) -> str:
+    return _cfg().aliases.get(name, name)
 
 
 def _fmt(secs: float) -> str:
@@ -84,36 +58,43 @@ def _first(rec: dict | None) -> dict | None:
     return rec.get("first") if rec else None
 
 
-# Parallel questions for "Retry this objective": the misconceptions each objective covers.
-OBJECTIVE_TAGS = {
-    1: ["count_places_not_edges", "length_is_cost"],
-    2: ["one_way_edge"],
-    3: ["fifo_lifo", "wrong_layer"],
-    4: ["mark_on_serve", "duplicate"],
-    5: ["unreachable", "parent_reversed"],
-}
-READY_NOTE = "Ready is based on your answers, not on time spent."
-
-
-def retry_tag(objective: int, answers: dict) -> str:
-    """The tag to retry: the misconception behind this objective's lecture-ready-check mistake if there was one."""
-    quiz = loader.find_section("4", "ready")
-    for q in quiz.questions:
-        rec = _first(answers.get("ready", {}).get(q.id))
-        if q.objective == objective and rec and rec.get("tag") in OBJECTIVE_TAGS[objective]:
-            return rec["tag"]
-    return OBJECTIVE_TAGS[objective][0]
+def _lower_first(text: str) -> str:
+    return text[:1].lower() + text[1:] if text else text
 
 
 # --------------------------------------------------------------------------
-# Readiness report (the lecture-ready check, end of Module 4)
+# Objectives and their misconceptions (from misconceptions.json)
+# --------------------------------------------------------------------------
+
+
+def objective_tags() -> dict[int, list[str]]:
+    """Objective number -> the misconception tags that belong to it."""
+    out: dict[int, list[str]] = {}
+    for tag, m in loader.misconceptions().items():
+        out.setdefault(m.objective, []).append(tag)
+    return out
+
+
+def retry_tag(objective: int, answers: dict) -> str | None:
+    """The tag to retry: the misconception behind this objective's lecture-ready-check mistake if there was one."""
+    tags = objective_tags().get(objective, [])
+    _, quiz = loader.quiz_by_mode("ready")
+    for q in quiz.questions:
+        rec = _first(answers.get(quiz.quiz, {}).get(q.id))
+        if q.objective == objective and rec and rec.get("tag") in tags:
+            return rec["tag"]
+    return tags[0] if tags else None
+
+
+# --------------------------------------------------------------------------
+# Readiness report (the lecture-ready check)
 # --------------------------------------------------------------------------
 
 
 def readiness(answers: dict, own_questions: list | None = None) -> dict | None:
-    quiz = loader.find_section("4", "ready")
-    warm = loader.find_section("1", "warmup")
-    given = answers.get("ready", {})
+    _, quiz = loader.quiz_by_mode("ready")
+    warm_topic, warm = loader.quiz_by_mode("warmup")
+    given = answers.get(quiz.quiz, {})
     if not given:
         return None
 
@@ -137,21 +118,33 @@ def readiness(answers: dict, own_questions: list | None = None) -> dict | None:
                            "can_retry": status == "Review",
                            "see": None if status == "Ready" else next((i["see"] for i in mine if i["status"] != "Ready"), None)})
 
-    warm_given = answers.get("warmup", {})
-    warm_right = sum(1 for q in warm.questions if (_first(warm_given.get(q.id)) or {}).get("right"))
     now_right = sum(1 for i in items if i["right"])
+    if warm is not None:
+        warm_given = answers.get(warm.quiz, {})
+        warm_right = sum(1 for q in warm.questions if (_first(warm_given.get(q.id)) or {}).get("right"))
+        warm_total = len(warm.questions)
+    else:
+        warm_given, warm_right, warm_total = {}, 0, 0
+    w = _cfg().wording
+    nums = {"now": now_right, "total": len(quiz.questions), "warm": warm_right, "warm_total": warm_total}
+    if warm_given:
+        comparison = w.compareBoth.format(**nums)
+    elif warm is not None:
+        comparison = w.compareNoWarmup.format(**nums, module=warm_topic)
+    else:
+        comparison = w.compareNow.format(**nums)
+
     questions = list(loader.course().default_questions)
     questions += [x.get("text", "") for x in (own_questions or []) if x.get("text")]
 
     return {
-        "note": READY_NOTE,
+        "note": _cfg().readyNote,
         "items": items,
         "objectives": objectives,
         "ready_count": sum(1 for o in objectives if o["status"] == "Ready"),
-        "warmup": {"right": warm_right, "total": len(warm.questions), "taken": bool(warm_given)},
+        "warmup": {"right": warm_right, "total": warm_total, "taken": bool(warm_given)},
         "now": {"right": now_right, "total": len(quiz.questions)},
-        "comparison": (f"Warm-up: {warm_right} of {len(warm.questions)}. Now: {now_right} of {len(quiz.questions)}."
-                       if warm_given else f"Now: {now_right} of {len(quiz.questions)}. (Do the warm-up in Module 1 to compare.)"),
+        "comparison": comparison,
         "questions": questions,
     }
 
@@ -163,22 +156,25 @@ def readiness(answers: dict, own_questions: list | None = None) -> dict | None:
 
 def _accuracy(track: dict, answers: dict) -> dict:
     """Right/total per concept: lesson practice (browser) + checked answers (server, first try, no warm-up)."""
-    acc = {c: [0, 0] for c in CONCEPTS}
+    acc = {c: [0, 0] for c in _concept_names()}
     for c, (r, n) in (track.get("acc") or {}).items():
-        c = CONCEPT_ALIASES.get(c, c)
+        c = _alias(c)
         if c in acc:
             acc[c][0] += r
             acc[c][1] += n
+
+    _, warm = loader.quiz_by_mode("warmup")
+    warm_id = warm.quiz if warm else None
     concept_of = {}
     for t in loader.topics():
         for s in t.sections:
             for q in getattr(s, "questions", []) or []:
-                concept_of[(getattr(s, "quiz", None), q.id)] = q.concept or t.concept
+                concept_of[(getattr(s, "quiz", None), q.id)] = _alias(q.concept or t.concept or "")
             if getattr(s, "kind", None) == "trace":
                 for i, _ in enumerate(s.steps):
-                    concept_of[(f"trace:{s.trace}", str(i))] = t.concept
+                    concept_of[(f"trace:{s.trace}", str(i))] = _alias(t.concept or "")
     for quiz, recs in answers.items():
-        if quiz == "warmup" or quiz.startswith("_"):
+        if quiz == warm_id or quiz.startswith("_") or not isinstance(recs, dict):
             continue
         for qid, rec in recs.items():
             first = _first(rec)
@@ -187,9 +183,11 @@ def _accuracy(track: dict, answers: dict) -> dict:
                 continue
             acc[c][0] += 1 if first["right"] else 0
             acc[c][1] += 1
+
+    kinds, sources = _cfg().practiceKinds, set(_cfg().practiceSources)
     for e in answers.get("_log", []):
-        c = KIND_CONCEPT.get(e.get("kind"))
-        if e.get("source") in ("practice", "fullquiz") and c in acc and e.get("right") is not None:
+        c = kinds.get(e.get("kind"))
+        if e.get("source") in sources and c in acc and e.get("right") is not None:
             acc[c][0] += 1 if e["right"] else 0
             acc[c][1] += 1
     return acc
@@ -212,99 +210,176 @@ def mistakes(answers: dict) -> dict:
     slips = []
     for tag, n in tags.most_common():
         m = loader.misconception(tag)
+        if not m:
+            continue
         slips.append({"tag": tag, "count": n, "title": m["title"], "explain": m["explain"], "concept": m["concept"],
                       "objective": m["objective"], "link": f"{m['topic']}?go={m['go']}", "label": m["label"]})
     return {"slips": slips, "objectives": {o: {"right": r, "total": n} for o, (r, n) in by_obj.items()}}
 
 
 def analysis(state: dict, answers: dict, today: date | None = None) -> dict:
+    cfg = _cfg()
+    limits = cfg.limits
+    modes_order = _modes()
     track = state.get("track") or {}
-    modes_real = {m: (track.get("modes") or {}).get(m, 0) for m in MODES}
-    sample = sum(modes_real.values()) == 0
-    modes = SAMPLE["modes"] if sample else modes_real
-    total = sum(modes.values()) or 1
 
-    ranked = sorted(MODES, key=lambda m: -modes[m])
+    # Time by way of learning: real data only.
+    modes = {m: (track.get("modes") or {}).get(m, 0) for m in modes_order}
+    total_secs = sum(modes.values())
+    enough_time = total_secs >= cfg.minMinutes * 60
+    words = cfg.wording
+
+    acc = _accuracy(track, answers)
+    answered = sum(n for _, n in acc.values())
+    empty = total_secs == 0 and answered == 0
+
+    ranked = sorted(modes_order, key=lambda m: -modes[m])
     top, low = ranked[0], ranked[-1]
-    head, body, tips = INSIGHTS[top]
+    if enough_time:
+        ins = cfg.modes[top]
+        stretch = cfg.modes[low].stretch
+        insight = {"head": ins.head, "body": ins.body, "tips": list(ins.tips), "stretch": stretch}
+    else:
+        stretch = ""
+        insight = {"head": cfg.notEnoughHead, "body": cfg.emptyMessage, "tips": [], "stretch": ""}
 
-    concept_time = dict(SAMPLE["concepts"]) if sample else {}
-    if not sample:
-        for c, secs in (track.get("concepts") or {}).items():
-            c = CONCEPT_ALIASES.get(c, c)
-            concept_time[c] = concept_time.get(c, 0) + secs
-    acc = {c: list(v) for c, v in SAMPLE["acc"].items()} if sample else _accuracy(track, answers)
+    concept_time: dict[str, float] = {}
+    for c, secs in (track.get("concepts") or {}).items():
+        c = _alias(c)
+        concept_time[c] = concept_time.get(c, 0) + secs
 
     seen = mistakes(answers)
     concepts = []
-    for c in CONCEPTS:
+    for c in _concept_names():
         r, n = acc.get(c, [0, 0])
         pct = round(r / n * 100) if n else None
-        status = "Not checked" if pct is None else ("Review" if pct < 70 else "Ready")
-        advice = {
-            "Not checked": "Do a few questions to check this one.",
-            "Review": "Some answers here aren't right yet. Try it a different way: " + STRETCH[low][0].lower() + STRETCH[low][1:],
-            "Ready": "Looking good. A quick recap before the lecture is enough.",
-        }[status]
-        slips = [x for x in seen["slips"] if x["concept"] == c][:2]
+        status = "Not checked" if pct is None else ("Review" if pct < cfg.reviewBelow else "Ready")
+        if status == "Review":
+            advice = (words.adviceReview.format(stretch=_lower_first(stretch))
+                      if stretch else words.adviceReviewPlain)
+        elif status == "Ready":
+            advice = words.adviceReady
+        else:
+            advice = words.adviceNotChecked
+        slips = [x for x in seen["slips"] if x["concept"] == c][:limits.slipsPerConcept]
         if slips and status == "Ready":
             status = "Review"  # a misconception showed up, even if most answers were right
-            advice = "Mostly right, but one mistake keeps showing up. Have a look at it below."
-        review = slips[0]["link"] if slips else f"{CONCEPT_TOPIC[c]}?go={CONCEPT_PART[c]}"
+            advice = words.adviceSlip
+        topic_id, part = _concept_link(c)
+        review = slips[0]["link"] if slips else f"{topic_id}?go={part}"
         concepts.append({"name": c, "secs": concept_time.get(c, 0), "time": _fmt(concept_time.get(c, 0)),
-                         "right": r, "total": n, "pct": pct, "status": status, "advice": advice, "topic": CONCEPT_TOPIC[c],
+                         "right": r, "total": n, "pct": pct, "status": status, "advice": advice, "topic": topic_id,
                          "review": review, "slips": slips})
+
+    # A personal focus line, from this student's own answers.
+    checked = [c for c in concepts if c["total"]]
+    weakest = min(checked, key=lambda c: (c["pct"], -c["total"])) if checked else None
+    focus = []
+    if weakest and weakest["pct"] < cfg.reviewBelow:
+        focus.append(words.focusWeakest.format(name=weakest["name"], right=weakest["right"], total=weakest["total"]))
+    if seen["slips"]:
+        s = seen["slips"][0]
+        focus.append(words.focusSlip.format(title=_lower_first(s["title"]), count=s["count"]))
+    insight["focus"] = " ".join(focus) or None
 
     all_r = sum(c["right"] for c in concepts)
     all_n = sum(c["total"] for c in concepts)
 
+    # This week: the student's real minutes per day (zeros are fine).
     today = today or date.today()
     monday = today - timedelta(days=today.weekday())
     days = track.get("days") or {}
     week = [round(days.get((monday + timedelta(days=i)).isoformat(), 0) / 60) for i in range(7)]
-    if sample or not any(week):
-        week = SAMPLE["week"]
 
     done = state.get("topics") or {}
     ids = [t.id for t in loader.topics()]
     done_ids = [i for i in ids if done.get(i)]
     report = readiness(answers, state.get("questions"))
+    ready_topic, ready_quiz = loader.quiz_by_mode("ready")
 
     review = [c for c in concepts if c["status"] == "Review"]
     titles = {t.id: t.title for t in loader.topics()}
-    plan = [f"Revisit Module {s['link'].split('?')[0]} for “{s['title'].lower()}”, then try a similar question." for s in seen["slips"][:1]]
-    plan += [f"Revisit Module {c['topic']} {titles[c['topic']]} ({c['name']}), using a different way to learn." for c in review[:2] if not c["slips"]]
+    plan = [words.planSlip.format(module=s["link"].split("?")[0], title=s["title"].lower())
+            for s in seen["slips"][:1]]
+    plan += [words.planReview.format(module=c["topic"], title=titles[c["topic"]], concept=c["name"])
+             for c in review[:2] if not c["slips"]]
+    if not empty and not review and not seen["slips"]:
+        unchecked = [c for c in concepts if c["status"] == "Not checked" and concept_time.get(c["name"])]
+        plan += [words.planPractise.format(module=c["topic"], concept=c["name"]) for c in unchecked[:1]]
     nxt = next((i for i in ids if not done.get(i)), None)
     if nxt:
-        plan.append(f"Carry on with Module {nxt}: {titles[nxt]}.")
+        plan.append(words.planNext.format(module=nxt, title=titles[nxt]))
     if not report:
-        plan.append("Take the lecture-ready check at the end of Module 4 to get your readiness report.")
-    plan.append("Write down one question to bring to the lecture.")
+        plan.append(words.planReadyCheck.format(module=ready_topic))
+    plan.append(words.planQuestion)
 
-    goals = report["objectives"] if report else [
-        {"num": o.num, "text": o.text, "level": o.level, "status": "Not checked yet", "see": None}
-        for o in loader.course().objectives
-    ]
+    # Goal by goal: the lecture-ready check decides once it's done; before that, the student's own tries.
+    tones = {"Ready": "ok", "Review": "warn"}
+    if report:
+        goals = report["objectives"]
+        for g in goals:
+            g["tone"] = tones.get(g["status"], "lilac")
+    else:
+        goals = []
+        for o in loader.course().objectives:
+            st = seen["objectives"].get(o.num) or {"right": 0, "total": 0}
+            slip = next((x for x in seen["slips"] if x["objective"] == o.num), None)
+            if not st["total"]:
+                status, tone = words.goalNotChecked, "lilac"
+            elif slip or st["right"] / st["total"] * 100 < cfg.reviewBelow:
+                status, tone = words.goalReview, "warn"
+            else:
+                status, tone = words.goalGood, "ok"
+            goals.append({"num": o.num, "text": o.text, "level": o.level, "status": status, "tone": tone,
+                          "see": slip["link"] if slip and tone == "warn" else None})
     for g in goals:
-        st = seen["objectives"].get(g["num"])
-        g["attempts"] = st or {"right": 0, "total": 0}
+        g["attempts"] = seen["objectives"].get(g["num"]) or {"right": 0, "total": 0}
+
+    # Questions to bring: first for the concepts this student is finding hard, then the course's
+    # starter questions to fill up, then every question the student wrote themselves.
+    links = {c.name: c for c in cfg.concepts}
+    hard = [x["concept"] for x in seen["slips"]] + [c["name"] for c in review]
+    suggested = []
+    for name in hard:
+        q = links[name].question if name in links else None
+        if q and q not in suggested:
+            suggested.append(q)
+    for q in loader.course().default_questions:
+        if len(suggested) >= limits.questions:
+            break
+        if q not in suggested:
+            suggested.append(q)
+    own = [q.get("text", "") for q in (state.get("questions") or []) if q.get("text")]
+    questions = suggested[:limits.questions] + own
+
+    ready_go = None
+    if ready_quiz is not None:
+        for sec in loader.topic(ready_topic).sections:
+            if sec is ready_quiz:
+                break
+            if getattr(sec, "kind", None) == "part":
+                ready_go = sec.id
 
     return {
-        "sample": sample,
-        "total": _fmt(sum(modes.values())),
-        "modes": [{"name": m, "secs": modes[m], "time": _fmt(modes[m]), "pct": round(modes[m] / total * 100)} for m in MODES],
-        "top": top,
-        "low": low,
-        "insight": {"head": head, "body": body, "tips": tips, "stretch": STRETCH[low]},
+        "sample": False,  # kept for older front ends; there is never sample data now
+        "empty": empty,
+        "enough_time": enough_time,
+        "message": cfg.emptyMessage if empty else None,
+        "total": _fmt(total_secs),
+        "modes": [{"name": m, "secs": modes[m], "time": _fmt(modes[m]),
+                   "pct": round(modes[m] / total_secs * 100) if total_secs else 0} for m in modes_order],
+        "top": top if enough_time else None,
+        "low": low if enough_time else None,
+        "insight": insight,
         "accuracy": {"right": all_r, "total": all_n, "pct": round(all_r / all_n * 100) if all_n else None},
         "topics": {"done": len(done_ids), "total": len(ids)},
         "goals_ready": {"ready": report["ready_count"] if report else 0, "total": len(loader.course().objectives)},
         "concepts": concepts,
-        "slips": seen["slips"][:3],
-        "week": [{"day": d, "mins": m} for d, m in zip(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], week)],
-        "plan": plan[:3],
+        "slips": seen["slips"][:limits.slips],
+        "week": [{"day": d, "mins": m} for d, m in zip(WEEKDAYS, week)],
+        "plan": plan[:limits.plan],
         "goals": goals,
         "report": report,
-        "questions": report["questions"] if report else list(loader.course().default_questions)
-        + [q.get("text", "") for q in (state.get("questions") or []) if q.get("text")],
+        "questions": questions,
+        "ready_link": f"{ready_topic}?go={ready_go}" if ready_go else ready_topic,
     }

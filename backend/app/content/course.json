@@ -230,5 +230,160 @@
       "text": "Took the lecture-ready check",
       "topic": "4"
     }
-  ]
+  ],
+  "analysis": {
+    "reviewBelow": 70,
+    "minMinutes": 5,
+    "readyNote": "Ready is based on your answers, not on time spent.",
+    "emptyMessage": "Study for a few minutes and your analysis appears here. Start with Module 1, or jump into any module.",
+    "notEnoughHead": "Not enough study time yet",
+    "limits": {
+      "plan": 4,
+      "slips": 3,
+      "slipsPerConcept": 2,
+      "questions": 3
+    },
+    "concepts": [
+      {
+        "name": "Graphs",
+        "topic": "2",
+        "go": "s02",
+        "question": "How can I quickly tell whether a vertex is isolated or just far away?"
+      },
+      {
+        "name": "Graphs in Python",
+        "topic": "2",
+        "go": "s04",
+        "question": "Why does each undirected edge appear twice in the Python adjacency list?"
+      },
+      {
+        "name": "Queues",
+        "topic": "3",
+        "go": "s02",
+        "question": "Why does BFS need a queue, and what goes wrong if I use a stack instead?"
+      },
+      {
+        "name": "BFS",
+        "topic": "3",
+        "go": "s04",
+        "question": "How can I check my BFS trace layer by layer without losing track?"
+      },
+      {
+        "name": "Marking found",
+        "topic": "3",
+        "go": "s03",
+        "question": "Why is a vertex marked as found when it joins the queue, not when it's served?"
+      },
+      {
+        "name": "Routes",
+        "topic": "4",
+        "go": "s03",
+        "question": "How do the parent links give the route with the fewest edges, and why isn't that always the shortest distance?"
+      }
+    ],
+    "aliases": {
+      "BFS in Python": "BFS"
+    },
+    "practiceSources": [
+      "practice",
+      "fullquiz"
+    ],
+    "practiceKinds": {
+      "nbr": "Graphs in Python",
+      "degree": "Graphs",
+      "iso": "Graphs",
+      "routeLen": "Graphs",
+      "order": "BFS",
+      "queue": "Queues",
+      "level": "BFS",
+      "bug": "Marking found",
+      "hops": "Routes",
+      "route": "Routes",
+      "reach": "Routes",
+      "parent": "Routes"
+    },
+    "modes": {
+      "Watching": {
+        "head": "You've spent most of your time watching.",
+        "body": "Most of your time went to the animations.",
+        "tips": [
+          "Pause at each chapter and predict what happens next before you press play.",
+          "Sketch graph A–F and colour it in as the animation plays.",
+          "Replay “The queue is a line” (Module 3, section 02) before the lecture."
+        ],
+        "stretch": "Watch one animation and pause at each chapter to predict what comes next."
+      },
+      "Listening": {
+        "head": "You've spent most of your time listening.",
+        "body": "Most of your time went to the notes read aloud.",
+        "tips": [
+          "Play the notes at 1.25× while you trace BFS on paper.",
+          "Use the microphone to explain each step out loud, then compare with the model answer.",
+          "Listen to Module 3 once more on the way to class."
+        ],
+        "stretch": "Press a speaker on the notes and trace along on paper as you listen."
+      },
+      "Reading": {
+        "head": "You've spent most of your time reading.",
+        "body": "Most of your time went to the written notes.",
+        "tips": [
+          "Rewrite the BFS recipe in your own words in three lines.",
+          "Turn the glossary into flashcards and test yourself.",
+          "Read the BFS code line by line in the Code lab."
+        ],
+        "stretch": "Read the notes on screen once without audio, then summarise them in one line."
+      },
+      "Trying": {
+        "head": "You've spent most of your time trying things.",
+        "body": "Most of your time went to trial and error on the map.",
+        "tips": [
+          "Do a Mixed practice round: every round has a new graph.",
+          "When you miss one, say why the wrong answer fails before moving on.",
+          "Use Next step in Module 3, section 04, and predict each row first."
+        ],
+        "stretch": "Spend five minutes in Be the Queue (Module 3, section 06), where it's fine to get it wrong."
+      },
+      "Coding": {
+        "head": "You've spent most of your time coding.",
+        "body": "Most of your time went to the code labs.",
+        "tips": [
+          "Predict the printed output before you press Run.",
+          "Change the start vertex and run it again.",
+          "Add a new vertex to the graph dictionary and see what changes."
+        ],
+        "stretch": "Open a code lab and press Step five times while watching the queue."
+      },
+      "Practising": {
+        "head": "You've spent most of your time practising.",
+        "body": "Most of your time went to practice questions.",
+        "tips": [
+          "Try the Full quiz: 15 new questions across all modules.",
+          "For any miss, press Show me in the lesson and watch that step.",
+          "Practise the module you scored lowest on first."
+        ],
+        "stretch": "Do a practice round straight after an animation."
+      }
+    },
+    "wording": {
+      "adviceReview": "Some answers here aren't right yet. Try it a different way: {stretch}",
+      "adviceReviewPlain": "Some answers here aren't right yet. Revisit the part linked below.",
+      "adviceReady": "Looking good. A quick recap before the lecture is enough.",
+      "adviceNotChecked": "Do a few questions to check this one.",
+      "adviceSlip": "Mostly right, but one mistake keeps showing up. Have a look at it below.",
+      "focusWeakest": "Your weakest area so far is {name} ({right} of {total} right).",
+      "focusSlip": "The mistake you've made most is “{title}” ({count}×).",
+      "planSlip": "Revisit Module {module} for “{title}”, then try a similar question.",
+      "planReview": "Revisit Module {module} {title} ({concept}), using a different way to learn.",
+      "planNext": "Carry on with Module {module}: {title}.",
+      "planReadyCheck": "Take the lecture-ready check in Module {module} to get your readiness report.",
+      "planQuestion": "Write down one question to bring to the lecture.",
+      "compareBoth": "Warm-up: {warm} of {warm_total}. Now: {now} of {total}.",
+      "compareNoWarmup": "Now: {now} of {total}. (Do the warm-up in Module {module} to compare.)",
+      "compareNow": "Now: {now} of {total}.",
+      "planPractise": "Answer a few questions on {concept} in Module {module} so you can see how you're doing.",
+      "goalGood": "On track",
+      "goalReview": "Review",
+      "goalNotChecked": "Not checked yet"
+    }
+  }
 }

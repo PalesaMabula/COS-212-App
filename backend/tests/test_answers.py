@@ -80,10 +80,10 @@ def test_readiness_report_rules():
     assert all("conf" not in i for i in r["items"])
 
 
-def test_analysis_uses_sample_until_there_is_data():
+def test_analysis_is_empty_until_there_is_data():
     g = new_guest()
     a = client.get(f"/api/learners/{g}/analysis").json()
-    assert a["sample"] is True and a["top"] == "Listening"
+    assert a["empty"] is True and a["sample"] is False and a["top"] is None
     client.put(f"/api/learners/{g}/state/track", json={"value": {"modes": {"Coding": 300}, "concepts": {"BFS": 300}, "acc": {}, "days": {}}})
     a = client.get(f"/api/learners/{g}/analysis").json()
     assert a["sample"] is False and a["top"] == "Coding"

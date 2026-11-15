@@ -155,6 +155,20 @@ def _cross_check(mods: tuple[ModuleFile, ...]) -> None:
         raise ContentError("Course content problems:\n  " + "\n  ".join(problems))
 
 
+def quiz_by_mode(mode: str) -> tuple[str, QuizSection] | tuple[None, None]:
+    """The first quiz with this mode (e.g. "warmup", "ready") and the topic it's in."""
+    for t in topics():
+        for s in t.sections:
+            if isinstance(s, QuizSection) and s.mode == mode:
+                return t.id, s
+    return None, None
+
+
+def _part_ids(topic_id: str) -> set[str]:
+    t = topic(topic_id)
+    return {p["id"] for p in parts(t)} if t else set()
+
+
 def load_all() -> None:
     """Validate everything now (called at start-up)."""
     course()
@@ -164,5 +178,25 @@ def load_all() -> None:
     for k, m in misconceptions().items():
         if m.topic not in ids:
             raise ContentError(f"misconception {k} links to missing module {m.topic}")
-        if m.go not in {p["id"] for p in parts(topic(m.topic))}:
+        if m.go not in _part_ids(m.topic):
             raise ContentError(f"misconception {k} links to missing part {m.topic}?go={m.go}")
+
+    a = course().analysis
+    names = {c.name for c in a.concepts}
+    problems = []
+    for c in a.concepts:
+        if c.topic not in ids:
+            problems.append(f"analysis concept {c.name} links to missing module {c.topic}")
+        elif c.go not in _part_ids(c.topic):
+            problems.append(f"analysis concept {c.name} links to missing part {c.topic}?go={c.go}")
+    for k, m in misconceptions().items():
+        if m.concept not in names:
+            problems.append(f"misconception {k} uses concept '{m.concept}', which isn't in analysis.concepts")
+    objectives = {o.num for o in course().objectives}
+    for k, m in misconceptions().items():
+        if m.objective not in objectives:
+            problems.append(f"misconception {k} points at missing objective {m.objective}")
+    if quiz_by_mode("ready")[1] is None:
+        problems.append("no quiz with mode \"ready\" (the lecture-ready check)")
+    if problems:
+        raise ContentError("Course content problems:\n  " + "\n  ".join(problems))

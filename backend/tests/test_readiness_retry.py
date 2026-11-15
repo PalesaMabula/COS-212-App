@@ -9,7 +9,7 @@ os.environ.setdefault("COS212_DB", os.path.join(tempfile.mkdtemp(), "retry.db"))
 from fastapi.testclient import TestClient  # noqa: E402
 
 from app import db  # noqa: E402
-from app.core.analysis import INSIGHTS  # noqa: E402
+from app.content import loader  # noqa: E402
 from app.core.practice import make_similar  # noqa: E402
 from app.main import app  # noqa: E402
 
@@ -79,7 +79,8 @@ def test_retry_unknown_objective():
 
 
 def test_analysis_describes_behaviour_not_a_learning_style():
-    for head, body, _tips in INSIGHTS.values():
+    for m in loader.course().analysis.modes.values():
+        head, body = m.head, m.body
         assert head.startswith("You've spent most of your time")
         assert "learn a lot" not in head and " so " not in body
     g = str(uuid.uuid4())

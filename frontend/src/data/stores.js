@@ -122,26 +122,24 @@ export function weekDates(d = new Date()) {
   });
 }
 
-const SAMPLE_WEEK = [12, 0, 18, 25, 9, 0, 0];
 const DAY_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 /**
- * This week's minutes per day from tracking. Falls back to the sample week
- * from the design when nothing has been tracked yet (isSample: true).
+ * This week's minutes per day, from the student's own tracked time only.
+ * No sample data: an empty week shows zeros (isEmpty: true) and topMode is null.
  */
 export function weekSummary(track) {
   const days = weekDates();
-  const real = days.map((d) => Math.round((track?.days?.[dateKey(d)] || 0) / 60));
-  const isSample = real.every((m) => m === 0);
-  const mins = isSample ? SAMPLE_WEEK : real;
+  const mins = days.map((d) => Math.round((track?.days?.[dateKey(d)] || 0) / 60));
   const modes = track?.modes || {};
-  const top = MODES.reduce((best, m) => ((modes[m] || 0) > (modes[best] || 0) ? m : best), MODES[0]);
   const hasModes = MODES.some((m) => (modes[m] || 0) > 0);
+  const top = hasModes ? MODES.reduce((best, m) => ((modes[m] || 0) > (modes[best] || 0) ? m : best), MODES[0]) : null;
+  const total = mins.reduce((a, b) => a + b, 0);
   return {
-    isSample,
-    total: mins.reduce((a, b) => a + b, 0),
-    topMode: hasModes && !isSample ? top : 'Listening',
+    isEmpty: total === 0,
+    total,
+    topMode: top,
     bars: mins.map((v, i) => ({ short: DAY_SHORT[i], long: DAY_LONG[i], mins: v })),
   };
 }

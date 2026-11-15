@@ -220,7 +220,7 @@ class RetryIn(BaseModel):
 @router.get("/{learner_id}/retry/{objective}", summary="A fresh question for an objective marked Review")
 def retry_question(learner_id: str, objective: int, seed: int | None = None):
     lid = _id(learner_id)
-    if objective not in an.OBJECTIVE_TAGS:
+    if objective not in an.objective_tags():
         raise HTTPException(status_code=404, detail="No such objective")
     tag = an.retry_tag(objective, db.get_one(lid, "answers") or {})
     q = make_similar(tag, seed or random.randint(1, 233279))
@@ -230,7 +230,7 @@ def retry_question(learner_id: str, objective: int, seed: int | None = None):
 @router.post("/{learner_id}/retry/{objective}", summary="Check a retry; a right answer marks the objective Ready")
 def retry_answer(learner_id: str, objective: int, body: RetryIn):
     lid = _id(learner_id)
-    if objective not in an.OBJECTIVE_TAGS:
+    if objective not in an.objective_tags():
         raise HTTPException(status_code=404, detail="No such objective")
     answers = db.get_one(lid, "answers") or {}
     tag = an.retry_tag(objective, answers)
